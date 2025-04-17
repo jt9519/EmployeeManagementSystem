@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            lblAppearHireDate = new Label();
             lblAppearEmployeeId = new Label();
             lbl = new Label();
             selectPosition = new ComboBox();
@@ -36,7 +37,6 @@
             btnDelete = new Button();
             linkCancel = new LinkLabel();
             btnUpdate = new Button();
-            btnClear = new Button();
             txtPhoneNum = new TextBox();
             txtMail = new TextBox();
             txtLastName = new TextBox();
@@ -54,13 +54,15 @@
             lblKanaFirstName = new Label();
             lblEmployeeId = new Label();
             label1 = new Label();
-            lblAppearHireDate = new Label();
+            btnClear = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
             // panel1
             // 
+            panel1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panel1.BackColor = Color.Azure;
+            panel1.Controls.Add(btnClear);
             panel1.Controls.Add(lblAppearHireDate);
             panel1.Controls.Add(lblAppearEmployeeId);
             panel1.Controls.Add(lbl);
@@ -69,7 +71,6 @@
             panel1.Controls.Add(btnDelete);
             panel1.Controls.Add(linkCancel);
             panel1.Controls.Add(btnUpdate);
-            panel1.Controls.Add(btnClear);
             panel1.Controls.Add(txtPhoneNum);
             panel1.Controls.Add(txtMail);
             panel1.Controls.Add(txtLastName);
@@ -87,54 +88,68 @@
             panel1.Controls.Add(lblKanaFirstName);
             panel1.Controls.Add(lblEmployeeId);
             panel1.Controls.Add(label1);
-            panel1.Dock = DockStyle.Fill;
             panel1.Location = new Point(0, 0);
             panel1.Margin = new Padding(0);
             panel1.Name = "panel1";
-            panel1.Padding = new Padding(3);
-            panel1.Size = new Size(1178, 744);
+            panel1.Padding = new Padding(2);
+            panel1.Size = new Size(912, 573);
             panel1.TabIndex = 0;
+            // 
+            // lblAppearHireDate
+            // 
+            lblAppearHireDate.AutoSize = true;
+            lblAppearHireDate.Location = new Point(166, 400);
+            lblAppearHireDate.Margin = new Padding(2, 0, 2, 0);
+            lblAppearHireDate.Name = "lblAppearHireDate";
+            lblAppearHireDate.Size = new Size(50, 20);
+            lblAppearHireDate.TabIndex = 38;
+            lblAppearHireDate.Text = "label2";
             // 
             // lblAppearEmployeeId
             // 
             lblAppearEmployeeId.AutoSize = true;
-            lblAppearEmployeeId.Location = new Point(219, 121);
+            lblAppearEmployeeId.Location = new Point(184, 99);
+            lblAppearEmployeeId.Margin = new Padding(2, 0, 2, 0);
             lblAppearEmployeeId.Name = "lblAppearEmployeeId";
-            lblAppearEmployeeId.Size = new Size(59, 25);
+            lblAppearEmployeeId.Size = new Size(50, 20);
             lblAppearEmployeeId.TabIndex = 37;
             lblAppearEmployeeId.Text = "label2";
             // 
             // lbl
             // 
             lbl.AutoSize = true;
-            lbl.Location = new Point(225, 121);
+            lbl.Location = new Point(180, 97);
+            lbl.Margin = new Padding(2, 0, 2, 0);
             lbl.Name = "lbl";
-            lbl.Size = new Size(0, 25);
+            lbl.Size = new Size(0, 20);
             lbl.TabIndex = 36;
             // 
             // selectPosition
             // 
             selectPosition.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             selectPosition.FormattingEnabled = true;
-            selectPosition.Location = new Point(175, 651);
+            selectPosition.Location = new Point(144, 521);
+            selectPosition.Margin = new Padding(2);
             selectPosition.Name = "selectPosition";
-            selectPosition.Size = new Size(182, 38);
+            selectPosition.Size = new Size(146, 33);
             selectPosition.TabIndex = 35;
             // 
             // selectOffice
             // 
             selectOffice.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             selectOffice.FormattingEnabled = true;
-            selectOffice.Location = new Point(175, 570);
+            selectOffice.Location = new Point(143, 456);
+            selectOffice.Margin = new Padding(2);
             selectOffice.Name = "selectOffice";
-            selectOffice.Size = new Size(182, 38);
+            selectOffice.Size = new Size(146, 33);
             selectOffice.TabIndex = 34;
             // 
             // btnDelete
             // 
-            btnDelete.Location = new Point(792, 539);
+            btnDelete.Location = new Point(634, 431);
+            btnDelete.Margin = new Padding(2);
             btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(112, 34);
+            btnDelete.Size = new Size(90, 27);
             btnDelete.TabIndex = 33;
             btnDelete.Text = "削除";
             btnDelete.UseVisualStyleBackColor = true;
@@ -142,83 +157,82 @@
             // linkCancel
             // 
             linkCancel.AutoSize = true;
-            linkCancel.Location = new Point(792, 636);
+            linkCancel.Location = new Point(634, 509);
+            linkCancel.Margin = new Padding(2, 0, 2, 0);
             linkCancel.Name = "linkCancel";
-            linkCancel.Size = new Size(81, 25);
+            linkCancel.Size = new Size(65, 20);
             linkCancel.TabIndex = 32;
             linkCancel.TabStop = true;
             linkCancel.Text = "キャンセル";
             // 
             // btnUpdate
             // 
-            btnUpdate.Location = new Point(644, 539);
+            btnUpdate.Location = new Point(515, 431);
+            btnUpdate.Margin = new Padding(2);
             btnUpdate.Name = "btnUpdate";
-            btnUpdate.Size = new Size(112, 34);
+            btnUpdate.Size = new Size(90, 27);
             btnUpdate.TabIndex = 31;
             btnUpdate.Text = "更新";
             btnUpdate.UseVisualStyleBackColor = true;
-            // 
-            // btnClear
-            // 
-            btnClear.Location = new Point(644, 471);
-            btnClear.Name = "btnClear";
-            btnClear.Size = new Size(112, 34);
-            btnClear.TabIndex = 30;
-            btnClear.Text = "クリア";
-            btnClear.UseVisualStyleBackColor = true;
             // 
             // txtPhoneNum
             // 
             txtPhoneNum.BorderStyle = BorderStyle.FixedSingle;
             txtPhoneNum.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            txtPhoneNum.Location = new Point(219, 420);
+            txtPhoneNum.Location = new Point(182, 335);
+            txtPhoneNum.Margin = new Padding(2);
             txtPhoneNum.Name = "txtPhoneNum";
-            txtPhoneNum.Size = new Size(331, 37);
+            txtPhoneNum.Size = new Size(265, 32);
             txtPhoneNum.TabIndex = 26;
             // 
             // txtMail
             // 
             txtMail.BorderStyle = BorderStyle.FixedSingle;
             txtMail.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            txtMail.Location = new Point(245, 344);
+            txtMail.Location = new Point(203, 273);
+            txtMail.Margin = new Padding(2);
             txtMail.Name = "txtMail";
-            txtMail.Size = new Size(586, 37);
+            txtMail.Size = new Size(469, 32);
             txtMail.TabIndex = 25;
             // 
             // txtLastName
             // 
             txtLastName.BorderStyle = BorderStyle.FixedSingle;
             txtLastName.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            txtLastName.Location = new Point(607, 268);
+            txtLastName.Location = new Point(491, 213);
+            txtLastName.Margin = new Padding(2);
             txtLastName.Name = "txtLastName";
-            txtLastName.Size = new Size(224, 37);
+            txtLastName.Size = new Size(180, 32);
             txtLastName.TabIndex = 24;
             // 
             // txtFirstName
             // 
             txtFirstName.BorderStyle = BorderStyle.FixedSingle;
             txtFirstName.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            txtFirstName.Location = new Point(231, 268);
+            txtFirstName.Location = new Point(190, 214);
+            txtFirstName.Margin = new Padding(2);
             txtFirstName.Name = "txtFirstName";
-            txtFirstName.Size = new Size(224, 37);
+            txtFirstName.Size = new Size(180, 32);
             txtFirstName.TabIndex = 23;
             // 
             // txtKanaLastName
             // 
             txtKanaLastName.BorderStyle = BorderStyle.FixedSingle;
             txtKanaLastName.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            txtKanaLastName.Location = new Point(606, 192);
+            txtKanaLastName.Location = new Point(492, 153);
+            txtKanaLastName.Margin = new Padding(2);
             txtKanaLastName.Name = "txtKanaLastName";
-            txtKanaLastName.Size = new Size(224, 37);
+            txtKanaLastName.Size = new Size(180, 32);
             txtKanaLastName.TabIndex = 22;
             // 
             // txtKanaFirstName
             // 
             txtKanaFirstName.BorderStyle = BorderStyle.FixedSingle;
             txtKanaFirstName.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
-            txtKanaFirstName.Location = new Point(230, 190);
+            txtKanaFirstName.Location = new Point(191, 151);
+            txtKanaFirstName.Margin = new Padding(2);
             txtKanaFirstName.Name = "txtKanaFirstName";
-            txtKanaFirstName.Size = new Size(224, 37);
+            txtKanaFirstName.Size = new Size(180, 32);
             txtKanaFirstName.TabIndex = 21;
             // 
             // lblPosition
@@ -228,11 +242,11 @@
             lblPosition.BorderStyle = BorderStyle.FixedSingle;
             lblPosition.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblPosition.ForeColor = Color.White;
-            lblPosition.Location = new Point(110, 651);
-            lblPosition.Margin = new Padding(3);
+            lblPosition.Location = new Point(88, 521);
+            lblPosition.Margin = new Padding(2);
             lblPosition.Name = "lblPosition";
-            lblPosition.Padding = new Padding(3);
-            lblPosition.Size = new Size(65, 38);
+            lblPosition.Padding = new Padding(2);
+            lblPosition.Size = new Size(56, 31);
             lblPosition.TabIndex = 20;
             lblPosition.Text = "役職";
             // 
@@ -243,11 +257,11 @@
             lblOffice.BorderStyle = BorderStyle.FixedSingle;
             lblOffice.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblOffice.ForeColor = Color.White;
-            lblOffice.Location = new Point(110, 570);
-            lblOffice.Margin = new Padding(3);
+            lblOffice.Location = new Point(88, 456);
+            lblOffice.Margin = new Padding(2);
             lblOffice.Name = "lblOffice";
-            lblOffice.Padding = new Padding(3);
-            lblOffice.Size = new Size(65, 38);
+            lblOffice.Padding = new Padding(2);
+            lblOffice.Size = new Size(56, 31);
             lblOffice.TabIndex = 19;
             lblOffice.Text = "拠点";
             // 
@@ -258,11 +272,11 @@
             lblHireDate.BorderStyle = BorderStyle.FixedSingle;
             lblHireDate.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblHireDate.ForeColor = Color.White;
-            lblHireDate.Location = new Point(110, 493);
-            lblHireDate.Margin = new Padding(3);
+            lblHireDate.Location = new Point(88, 394);
+            lblHireDate.Margin = new Padding(2);
             lblHireDate.Name = "lblHireDate";
-            lblHireDate.Padding = new Padding(3);
-            lblHireDate.Size = new Size(87, 38);
+            lblHireDate.Padding = new Padding(2);
+            lblHireDate.Size = new Size(75, 31);
             lblHireDate.TabIndex = 18;
             lblHireDate.Text = "雇用日";
             // 
@@ -273,11 +287,11 @@
             lblPhoneNum.BorderStyle = BorderStyle.FixedSingle;
             lblPhoneNum.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblPhoneNum.ForeColor = Color.White;
-            lblPhoneNum.Location = new Point(110, 419);
-            lblPhoneNum.Margin = new Padding(3);
+            lblPhoneNum.Location = new Point(88, 335);
+            lblPhoneNum.Margin = new Padding(2);
             lblPhoneNum.Name = "lblPhoneNum";
-            lblPhoneNum.Padding = new Padding(3);
-            lblPhoneNum.Size = new Size(109, 38);
+            lblPhoneNum.Padding = new Padding(2);
+            lblPhoneNum.Size = new Size(94, 31);
             lblPhoneNum.TabIndex = 17;
             lblPhoneNum.Text = "電話番号";
             // 
@@ -288,11 +302,11 @@
             lblMail.BorderStyle = BorderStyle.FixedSingle;
             lblMail.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblMail.ForeColor = Color.White;
-            lblMail.Location = new Point(110, 343);
-            lblMail.Margin = new Padding(3);
+            lblMail.Location = new Point(88, 274);
+            lblMail.Margin = new Padding(2);
             lblMail.Name = "lblMail";
-            lblMail.Padding = new Padding(3);
-            lblMail.Size = new Size(135, 38);
+            lblMail.Padding = new Padding(2);
+            lblMail.Size = new Size(115, 31);
             lblMail.TabIndex = 16;
             lblMail.Text = "メールアドレス";
             // 
@@ -303,11 +317,11 @@
             lblLastName.BorderStyle = BorderStyle.FixedSingle;
             lblLastName.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblLastName.ForeColor = Color.White;
-            lblLastName.Location = new Point(486, 267);
-            lblLastName.Margin = new Padding(3);
+            lblLastName.Location = new Point(389, 214);
+            lblLastName.Margin = new Padding(2);
             lblLastName.Name = "lblLastName";
-            lblLastName.Padding = new Padding(3);
-            lblLastName.Size = new Size(121, 38);
+            lblLastName.Padding = new Padding(2);
+            lblLastName.Size = new Size(102, 31);
             lblLastName.TabIndex = 15;
             lblLastName.Text = "名             ";
             // 
@@ -318,11 +332,11 @@
             lblFirstName.BorderStyle = BorderStyle.FixedSingle;
             lblFirstName.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblFirstName.ForeColor = Color.White;
-            lblFirstName.Location = new Point(110, 267);
-            lblFirstName.Margin = new Padding(3);
+            lblFirstName.Location = new Point(88, 214);
+            lblFirstName.Margin = new Padding(2);
             lblFirstName.Name = "lblFirstName";
-            lblFirstName.Padding = new Padding(3);
-            lblFirstName.Size = new Size(121, 38);
+            lblFirstName.Padding = new Padding(2);
+            lblFirstName.Size = new Size(102, 31);
             lblFirstName.TabIndex = 14;
             lblFirstName.Text = "姓             ";
             // 
@@ -333,13 +347,13 @@
             lblKanaLastName.BorderStyle = BorderStyle.FixedSingle;
             lblKanaLastName.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblKanaLastName.ForeColor = Color.White;
-            lblKanaLastName.Location = new Point(486, 191);
-            lblKanaLastName.Margin = new Padding(3);
+            lblKanaLastName.Location = new Point(389, 153);
+            lblKanaLastName.Margin = new Padding(2);
             lblKanaLastName.Name = "lblKanaLastName";
-            lblKanaLastName.Padding = new Padding(3);
-            lblKanaLastName.Size = new Size(120, 38);
+            lblKanaLastName.Padding = new Padding(2);
+            lblKanaLastName.Size = new Size(107, 31);
             lblKanaLastName.TabIndex = 13;
-            lblKanaLastName.Text = "名（カナ）";
+            lblKanaLastName.Text = "名（かな）";
             // 
             // lblKanaFirstName
             // 
@@ -348,13 +362,13 @@
             lblKanaFirstName.BorderStyle = BorderStyle.FixedSingle;
             lblKanaFirstName.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblKanaFirstName.ForeColor = Color.White;
-            lblKanaFirstName.Location = new Point(110, 189);
-            lblKanaFirstName.Margin = new Padding(3);
+            lblKanaFirstName.Location = new Point(88, 151);
+            lblKanaFirstName.Margin = new Padding(2);
             lblKanaFirstName.Name = "lblKanaFirstName";
-            lblKanaFirstName.Padding = new Padding(3);
-            lblKanaFirstName.Size = new Size(120, 38);
+            lblKanaFirstName.Padding = new Padding(2);
+            lblKanaFirstName.Size = new Size(107, 31);
             lblKanaFirstName.TabIndex = 12;
-            lblKanaFirstName.Text = "姓（カナ）";
+            lblKanaFirstName.Text = "姓（かな）";
             // 
             // lblEmployeeId
             // 
@@ -363,11 +377,11 @@
             lblEmployeeId.BorderStyle = BorderStyle.FixedSingle;
             lblEmployeeId.Font = new Font("Yu Gothic UI", 11F, FontStyle.Regular, GraphicsUnit.Point, 128);
             lblEmployeeId.ForeColor = Color.White;
-            lblEmployeeId.Location = new Point(110, 117);
-            lblEmployeeId.Margin = new Padding(3);
+            lblEmployeeId.Location = new Point(88, 94);
+            lblEmployeeId.Margin = new Padding(2);
             lblEmployeeId.Name = "lblEmployeeId";
-            lblEmployeeId.Padding = new Padding(3);
-            lblEmployeeId.Size = new Size(109, 38);
+            lblEmployeeId.Padding = new Padding(2);
+            lblEmployeeId.Size = new Size(94, 31);
             lblEmployeeId.TabIndex = 2;
             lblEmployeeId.Text = "社員番号";
             // 
@@ -375,27 +389,30 @@
             // 
             label1.AutoSize = true;
             label1.Font = new Font("Yu Gothic UI", 16F, FontStyle.Bold, GraphicsUnit.Point, 128);
-            label1.Location = new Point(12, 21);
+            label1.Location = new Point(10, 17);
+            label1.Margin = new Padding(2, 0, 2, 0);
             label1.Name = "label1";
-            label1.Size = new Size(212, 45);
+            label1.Size = new Size(179, 37);
             label1.TabIndex = 1;
             label1.Text = "社員詳細情報";
             // 
-            // lblAppearHireDate
+            // btnClear
             // 
-            lblAppearHireDate.AutoSize = true;
-            lblAppearHireDate.Location = new Point(203, 500);
-            lblAppearHireDate.Name = "lblAppearHireDate";
-            lblAppearHireDate.Size = new Size(59, 25);
-            lblAppearHireDate.TabIndex = 38;
-            lblAppearHireDate.Text = "label2";
+            btnClear.Location = new Point(515, 380);
+            btnClear.Margin = new Padding(2);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(90, 27);
+            btnClear.TabIndex = 39;
+            btnClear.Text = "クリア";
+            btnClear.UseVisualStyleBackColor = true;
             // 
             // ShowEmployeeInfoDetailForm
             // 
-            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1178, 744);
+            ClientSize = new Size(912, 573);
             Controls.Add(panel1);
+            Margin = new Padding(2);
             Name = "ShowEmployeeInfoDetailForm";
             Text = "社員詳細情報画面";
             panel1.ResumeLayout(false);
