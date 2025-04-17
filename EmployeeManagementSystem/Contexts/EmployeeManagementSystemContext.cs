@@ -7,6 +7,11 @@ using System.Threading.Tasks;
 using EmployeeManagementSystem.DataModel;
 using Microsoft.Extensions.Logging;
 using System.Reflection.Metadata;
+using System.Configuration;
+using Pomelo.EntityFrameworkCore.MySql;
+
+
+
 
 namespace EmployeeManagementSystem.Contexts
 {
@@ -16,6 +21,8 @@ namespace EmployeeManagementSystem.Contexts
         public DbSet<OperatorModel> Operator { get; set; } // Operation テーブル
         public DbSet<PositionModel> Position { get; set; } // Position テーブル
         public DbSet<OfficeModel> Office { get; set; } // Office テーブル
+        public DbSet<EmployeeView> EmployeeView { get; set; }
+
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -44,17 +51,30 @@ namespace EmployeeManagementSystem.Contexts
             modelBuilder.Entity<EmployeeModel>()
                 .ToTable("employee", "public");
 
+            // EmployeeView をデータベースビューとして設定
+            modelBuilder.Entity<EmployeeView>().ToView("EmployeeView"); // ビュー名を指定
+
+            // EmployeeView のプライマリーキーを設定
+            modelBuilder.Entity<EmployeeView>().HasKey(e => e.employee_id); // 正確なプロパティ名を使用
+
+            // 親クラスの設定を呼び出し
+            base.OnModelCreating(modelBuilder);
+
+
+
         }
 
         private readonly StringBuilder _logBuilder = new StringBuilder(); // ログ蓄積用
 
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder
-                .UseNpgsql("Host=127.0.0.1;Port=5432;Username=postgres;Password=Itigo332@@;Database=EmployeeManagementSystem")
-                .LogTo(log => _logBuilder.AppendLine(log), LogLevel.Information)  // ログ出力
-                .EnableSensitiveDataLogging(); // パラメーター値を出力する
+            // App.configの接続文字列を利用
+            string connectionString = ConfigurationManager.ConnectionStrings["MySqlConnection"].ConnectionString;
+            optionsBuilder.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 0, 41)));
+
+            //実行されたSQLをメッセージボックスに表示
+            //optionsBuilder.LogTo(sql => MessageBox.Show($"SQLクエリ: {sql}"), LogLevel.Information);
+
         }
 
         // ログを取得するためのメソッド
