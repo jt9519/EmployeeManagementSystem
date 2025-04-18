@@ -30,8 +30,9 @@ namespace EmployeeManagementSystem
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             panel1 = new Panel();
+            txtErrorMessages = new TextBox();
             btnConfirm = new Button();
             btnLogout = new Button();
             btnShowEmployeeInfoDetail = new Button();
@@ -71,6 +72,7 @@ namespace EmployeeManagementSystem
             panel1.AutoSize = true;
             panel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             panel1.BackColor = Color.Azure;
+            panel1.Controls.Add(txtErrorMessages);
             panel1.Controls.Add(btnConfirm);
             panel1.Controls.Add(btnLogout);
             panel1.Controls.Add(btnShowEmployeeInfoDetail);
@@ -83,6 +85,19 @@ namespace EmployeeManagementSystem
             panel1.Name = "panel1";
             panel1.Size = new Size(1304, 734);
             panel1.TabIndex = 1;
+            // 
+            // txtErrorMessages
+            // 
+            txtErrorMessages.BackColor = Color.Azure;
+            txtErrorMessages.BorderStyle = BorderStyle.None;
+            txtErrorMessages.Enabled = false;
+            txtErrorMessages.Location = new Point(24, 178);
+            txtErrorMessages.Multiline = true;
+            txtErrorMessages.Name = "txtErrorMessages";
+            txtErrorMessages.ReadOnly = true;
+            txtErrorMessages.Size = new Size(354, 37);
+            txtErrorMessages.TabIndex = 6;
+            txtErrorMessages.Visible = false;
             // 
             // btnConfirm
             // 
@@ -263,17 +278,16 @@ namespace EmployeeManagementSystem
             dataGridViewEmployee.AllowUserToDeleteRows = false;
             dataGridViewEmployee.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             dataGridViewEmployee.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = Color.Blue;
-            dataGridViewCellStyle2.Font = new Font("メイリオ", 10F, FontStyle.Bold);
-            dataGridViewCellStyle2.ForeColor = Color.White;
-            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
-            dataGridViewEmployee.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = Color.Blue;
+            dataGridViewCellStyle1.Font = new Font("メイリオ", 10F, FontStyle.Bold);
+            dataGridViewCellStyle1.ForeColor = Color.White;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dataGridViewEmployee.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dataGridViewEmployee.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewEmployee.Columns.AddRange(new DataGridViewColumn[] { employee_id, first_name, last_name, kana_first_name, kana_last_name, mail, phone_num, hire_date, office_name, position_name, status });
-            dataGridViewEmployee.Dock = DockStyle.Bottom;
             dataGridViewEmployee.EditMode = DataGridViewEditMode.EditOnEnter;
             dataGridViewEmployee.EnableHeadersVisualStyles = false;
             dataGridViewEmployee.Location = new Point(0, 220);
@@ -436,5 +450,6 @@ namespace EmployeeManagementSystem
         private DataGridViewTextBoxColumn office_name;
         private DataGridViewTextBoxColumn position_name;
         private DataGridViewTextBoxColumn status;
+        private TextBox txtErrorMessages;
     }
 }
