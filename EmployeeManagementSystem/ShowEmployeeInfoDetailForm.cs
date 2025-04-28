@@ -197,6 +197,13 @@ namespace EmployeeManagementSystem
 
             if (hasChanges)
             {
+                // 入力内容を検証
+                if (!ValidateInput())
+                {
+                    MessageBox.Show("入力エラーがあります。修正してください。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 // 更新処理を実行
                 UpdateDatabase(currentValues);
 
@@ -254,7 +261,18 @@ namespace EmployeeManagementSystem
         //クリアボタンクリック時のメソッド
         private void btnClear_Click(object sender, EventArgs e)
         {
+            //元のデータをセット
             LoadEmployeeDetails(EmployeeId);
+
+            //エラーをクリア
+            errorProvider.SetError(txtKanaFirstName, string.Empty);
+            errorProvider.SetError(txtKanaLastName, string.Empty);
+            errorProvider.SetError(txtFirstName, string.Empty);
+            errorProvider.SetError(txtLastName, string.Empty);
+            errorProvider.SetError(txtMail, string.Empty);
+            errorProvider.SetError(txtPhoneNum, string.Empty);
+            errorProvider.SetError(selectOffice, string.Empty);
+            errorProvider.SetError(selectPosition, string.Empty);
         }
 
         //削除ボタンクリック時のメソッド
@@ -311,6 +329,166 @@ namespace EmployeeManagementSystem
                     MessageBox.Show($"ステータス更新中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private ErrorProvider errorProvider = new ErrorProvider();
+
+        private bool ValidateInput()
+        {
+            bool isValid = true;
+
+            //
+            // 姓（かな）のバリデーション
+            //
+            if (string.IsNullOrEmpty(txtKanaFirstName.Text))
+            {
+                // 空欄の場合のエラー設定
+                errorProvider.SetError(txtKanaFirstName, "姓（かな）は入力必須です。");
+                isValid = false;
+            }
+            else if (txtKanaFirstName.Text.Length > 25)
+            {
+                // 文字数超過の場合のエラー設定
+                errorProvider.SetError(txtKanaFirstName, "姓（かな）は25文字以内で入力してください。");
+                isValid = false;
+            }
+            else if (!System.Text.RegularExpressions.Regex.IsMatch(txtKanaFirstName.Text, @"^[\u3041-\u3096ー]+$"))
+            {
+                // 平仮名以外が含まれている場合のエラー設定
+                errorProvider.SetError(txtKanaFirstName, "平仮名のみ入力してください。");
+                isValid = false;
+            }
+            else
+            {
+                errorProvider.SetError(txtKanaFirstName, string.Empty);
+            }
+            //
+            // 名（かな）のバリデーション
+            //
+            if (string.IsNullOrEmpty(txtKanaLastName.Text))
+            {
+                // 空欄の場合のエラー設定
+                errorProvider.SetError(txtKanaLastName, "名（かな）は入力必須です。");
+                isValid = false;
+            }
+            else if (txtKanaFirstName.Text.Length > 25)
+            {
+                // 文字数超過の場合のエラー設定
+                errorProvider.SetError(txtKanaFirstName, "名（かな）は25文字以内で入力してください。");
+                isValid = false;
+            }
+            else if (!System.Text.RegularExpressions.Regex.IsMatch(txtKanaLastName.Text, @"^[\u3041-\u3096ー]+$"))
+            {
+                // 平仮名以外が含まれている場合のエラー設定
+                errorProvider.SetError(txtKanaLastName, "平仮名のみ入力してください。");
+                isValid = false;
+            }
+            else
+            {
+                errorProvider.SetError(txtKanaLastName, string.Empty);
+            }
+            //
+            // 姓のバリデーション
+            //
+            if (string.IsNullOrEmpty(txtFirstName.Text))
+            {
+                // 空欄の場合のエラー設定
+                errorProvider.SetError(txtFirstName, "姓 は入力必須です。");
+                isValid = false;
+            }
+            else if (txtFirstName.Text.Length > 25)
+            {
+                // 文字数超過の場合のエラー設定
+                errorProvider.SetError(txtFirstName, "姓 は25文字以内で入力してください。");
+                isValid = false;
+            }
+            else
+            {
+                errorProvider.SetError(txtFirstName, string.Empty);
+            }
+            //
+            // 名のバリデーション
+            //
+            if (string.IsNullOrEmpty(txtLastName.Text))
+            {
+                // 空欄の場合のエラー設定
+                errorProvider.SetError(txtLastName, "名 は入力必須です。");
+                isValid = false;
+            }
+            else if (txtLastName.Text.Length > 25)
+            {
+                // 文字数超過の場合のエラー設定
+                errorProvider.SetError(txtLastName, "名 は25文字以内で入力してください。");
+                isValid = false;
+            }
+            else
+            {
+                errorProvider.SetError(txtLastName, string.Empty);
+            }
+            //
+            // メールアドレスのバリデーション
+            //
+            if (string.IsNullOrEmpty(txtMail.Text))
+            {
+                // 空欄の場合のエラー設定
+                errorProvider.SetError(txtMail, "メールアドレス は入力必須です。");
+                isValid = false;
+            }
+            else if (!System.Text.RegularExpressions.Regex.IsMatch(txtMail.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            {
+                errorProvider.SetError(txtMail, "有効なメールアドレスを入力してください。");
+                isValid = false;
+            }
+            else
+            {
+                errorProvider.SetError(txtMail, string.Empty);
+            }
+            //
+            // 電話番号のバリデーション
+            //
+            if (string.IsNullOrEmpty(txtPhoneNum.Text))
+            {
+                // 空欄の場合のエラー設定
+                errorProvider.SetError(txtPhoneNum, "電話番号 は入力必須です。");
+                isValid = false;
+            }
+            else if (!System.Text.RegularExpressions.Regex.IsMatch(txtPhoneNum.Text, @"^\d{2,4}-\d{2,4}-\d{4}$"))
+            {
+                errorProvider.SetError(txtPhoneNum, "電話番号は「080-1234-5678」の形式で入力してください。");
+                isValid = false;
+            }
+            else
+            {
+                errorProvider.SetError(txtPhoneNum, string.Empty);
+            }
+            //
+            // 拠点のバリデーション
+            //
+            if (string.IsNullOrEmpty(selectOffice.Text))
+            {
+                // 空欄の場合のエラー設定
+                errorProvider.SetError(selectOffice, "拠点 は入力必須です。");
+                isValid = false;
+            }
+            else
+            {
+                errorProvider.SetError(selectOffice, string.Empty);
+            }
+            //
+            // 役職のバリデーション
+            //
+            if (string.IsNullOrEmpty(selectPosition.Text))
+            {
+                // 空欄の場合のエラー設定
+                errorProvider.SetError(selectPosition, "役職 は入力必須です。");
+                isValid = false;
+            }
+            else
+            {
+                errorProvider.SetError(selectPosition, string.Empty);
+            }
+            
+            return isValid;
         }
     }
 }
