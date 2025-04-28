@@ -1,4 +1,5 @@
 ﻿using EmployeeManagementSystem.Contexts;
+using EmployeeManagementSystem.Utils;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -15,14 +16,12 @@ namespace EmployeeManagementSystem
     {
         private string EmployeeId;
         private ShowEmployeeInfoForm parentForm;
+        private bool isRetired; //退職済みかどうか
+
         public ShowEmployeeInfoDetailForm(string employeeId, ShowEmployeeInfoForm parentForm)
         {
             InitializeComponent();
             this.EmployeeId = employeeId;
-            this.ClientSize = new Size(1200, 800); // フォームサイズを固定
-            this.FormBorderStyle = FormBorderStyle.FixedDialog; // サイズ変更を無効化
-            this.MaximizeBox = false; // 最大化ボタンを無効化
-            this.StartPosition = FormStartPosition.CenterScreen; // 画面中央に表示
 
             //フォームロード時にデータを表示
             this.Load += ShowEmployeeInfoDetailForm_Load;
@@ -46,8 +45,8 @@ namespace EmployeeManagementSystem
             {
                 // 確認ダイアログを表示
                 DialogResult result = MessageBox.Show(
-                    "本当にキャンセルしてもよろしいですか？",
-                    "確認",
+                    InformationMessages.INFO003_CANCEL_CONFIRMATION,
+                    InformationMessages.TITLE001_CONFIRMATION,
                     MessageBoxButtons.YesNo, // YesとNoボタンを表示
                     MessageBoxIcon.Warning  // 警告アイコンを表示
                 );
@@ -66,13 +65,13 @@ namespace EmployeeManagementSystem
         {
             if (parentForm != null)
             {
+                parentForm.SearchAreaClear();
                 // 社員情報一覧画面のメソッドを呼び出す
                 parentForm.CheckIfFormClosed();
             }
         }
 
-
-
+  
         // 初期値を保存するディクショナリ
         private Dictionary<string, string> initialValues = new Dictionary<string, string>();
 
@@ -81,17 +80,38 @@ namespace EmployeeManagementSystem
             setConboBoxData();
             LoadEmployeeDetails(EmployeeId);
 
-
-        　　// 各項目の初期値を保存
-        　　initialValues["kana_first_name"] = txtKanaFirstName.Text;
-            initialValues["kana_last_name"] = txtKanaLastName.Text;
-            initialValues["first_name"] = txtFirstName.Text;
-            initialValues["last_name"] = txtLastName.Text;
-            initialValues["mail"] = txtMail.Text;
-            initialValues["phone_num"] = txtPhoneNum.Text;
-            initialValues["office_name"] = selectOffice.Text;
-            initialValues["position_name"] = selectPosition.Text;
+            //退職済の社員の情報はテキストボックスを読み取り専用に、拠点と役職のコンボボックス、クリア、削除、更新ボタンは非活性にする
+            if (isRetired) 
+            {
+                txtKanaFirstName.ReadOnly = true;
+                txtKanaLastName.ReadOnly = true;
+                txtFirstName.ReadOnly = true;
+                txtLastName.ReadOnly = true;
+                txtMail.ReadOnly = true;
+                txtPhoneNum.ReadOnly = true;
+                selectOffice.Enabled = false;
+                selectPosition.Enabled = false;
+                btnClear.Enabled = false;
+                btnDelete.Enabled = false;
+                btnUpdate.Enabled = false;
+                notifyEmployeeRetired.Text = InformationMessages.INFO001_NOTIFY_EMPLOYEE_RETIRED;
+                notifyEmployeeRetired.Visible = true;
+            }
+            else
+            {
+                // 各項目の初期値を保存
+                initialValues["kana_first_name"] = txtKanaFirstName.Text;
+                initialValues["kana_last_name"] = txtKanaLastName.Text;
+                initialValues["first_name"] = txtFirstName.Text;
+                initialValues["last_name"] = txtLastName.Text;
+                initialValues["mail"] = txtMail.Text;
+                initialValues["phone_num"] = txtPhoneNum.Text;
+                initialValues["office_name"] = selectOffice.Text;
+                initialValues["position_name"] = selectPosition.Text;
+            }                
         }
+
+
         private void LoadEmployeeDetails(string employeeId)
         {
             using (var dbContext = new EmployeeManagementSystemContext())
@@ -112,7 +132,8 @@ namespace EmployeeManagementSystem
                                         e.phone_num,
                                         e.hire_date,
                                         o.office_name,
-                                        p.position_name
+                                        p.position_name,
+                                        e.status
                                     }).FirstOrDefault();
                 if (employeeData != null)
                 {
@@ -127,10 +148,21 @@ namespace EmployeeManagementSystem
                     lblAppearHireDate.Text = employeeData.hire_date.ToString("yyyy/MM/dd");
                     selectOffice.SelectedItem = employeeData.office_name;
                     selectPosition.SelectedItem = employeeData.position_name;
+
+                    if(employeeData.status == 0)
+                    {
+                        isRetired = true;
+                    }
+                    else
+                    {
+                        isRetired = false;
+                    }
+                    
+
                 }
                 else
                 {
-                    MessageBox.Show("該当する社員のデータが見つかりません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show(ErrorMessages.ERR029_NOT_FIND_EMPLOYEE, InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
 
             }
@@ -170,7 +202,7 @@ namespace EmployeeManagementSystem
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"データの読み込み中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"{ErrorMessages.ERR019_DATABASE_READ_ERROR} {ex.Message}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -200,23 +232,35 @@ namespace EmployeeManagementSystem
                 // 入力内容を検証
                 if (!ValidateInput())
                 {
-                    MessageBox.Show("入力エラーがあります。修正してください。", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    MessageBox.Show(ErrorMessages.ERR026_HAVING_INPUT_ERROR, InformationMessages.TITLE004_INPUT_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
 
-                // 更新処理を実行
-                UpdateDatabase(currentValues);
 
-                // 初期値を更新
-                initialValues = new Dictionary<string, string>(currentValues);
+                // 確認ダイアログを表示
+                DialogResult result = MessageBox.Show(
+                    InformationMessages.INFO006_UPDATE_CONFIRMATION,
+                    InformationMessages.TITLE001_CONFIRMATION,
+                    MessageBoxButtons.YesNo, // YesとNoボタンを表示
+                    MessageBoxIcon.Warning  // 警告アイコンを表示
+                );
 
-                MessageBox.Show("データが更新されました。", "更新成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                // ダイアログの結果に基づいて処理
+                if (result == DialogResult.Yes)
+                {
+                    // 更新処理を実行
+                    UpdateDatabase(currentValues);
 
+                    // 初期値を更新
+                    initialValues = new Dictionary<string, string>(currentValues);
+
+                    MessageBox.Show(InformationMessages.INFO007_UPDATE_SUCCESS, InformationMessages.TITLE006_UPDATED, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
             }
             else
             {
                 // 変更がない場合
-                MessageBox.Show("変更がありません。", "注意", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(InformationMessages.INFO008_NOTIFY_NO_CHANGE, InformationMessages.TITLE007_ATTENTION, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -280,8 +324,8 @@ namespace EmployeeManagementSystem
         {
             // 確認ダイアログの表示
             DialogResult result = MessageBox.Show(
-                "本当に削除しますか？（ステータスが変更されます）",
-                "確認",
+                InformationMessages.INFO004_DELETE_CONFIRMATION,
+                InformationMessages.TITLE001_CONFIRMATION,
                 MessageBoxButtons.YesNo,
                 MessageBoxIcon.Warning
             );
@@ -313,7 +357,7 @@ namespace EmployeeManagementSystem
                         // 変更を保存
                         dbContext.SaveChanges();
 
-                        MessageBox.Show("削除されました。", "削除成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        MessageBox.Show(InformationMessages.INFO005_DELETE_SUCCESS, InformationMessages.TITLE005_DELETED, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
                         // フォームを閉じる
                         this.Close();
@@ -321,12 +365,12 @@ namespace EmployeeManagementSystem
                     }
                     else
                     {
-                        MessageBox.Show("削除が失敗しました。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        MessageBox.Show(ErrorMessages.ERR028_DELETE_FAILED, InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"ステータス更新中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"{ErrorMessages.ERR027_STATUS_UPDATE_ERROR} {ex.Message}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -343,19 +387,19 @@ namespace EmployeeManagementSystem
             if (string.IsNullOrEmpty(txtKanaFirstName.Text))
             {
                 // 空欄の場合のエラー設定
-                errorProvider.SetError(txtKanaFirstName, "姓（かな）は入力必須です。");
+                errorProvider.SetError(txtKanaFirstName, ErrorMessages.ERR004_MISSING_KANA_FIRST_NAME);
                 isValid = false;
             }
             else if (txtKanaFirstName.Text.Length > 25)
             {
                 // 文字数超過の場合のエラー設定
-                errorProvider.SetError(txtKanaFirstName, "姓（かな）は25文字以内で入力してください。");
+                errorProvider.SetError(txtKanaFirstName, ErrorMessages.ERR002_KANA_FIRST_NAME_LIMIT);
                 isValid = false;
             }
             else if (!System.Text.RegularExpressions.Regex.IsMatch(txtKanaFirstName.Text, @"^[\u3041-\u3096ー]+$"))
             {
                 // 平仮名以外が含まれている場合のエラー設定
-                errorProvider.SetError(txtKanaFirstName, "平仮名のみ入力してください。");
+                errorProvider.SetError(txtKanaFirstName, ErrorMessages.ERR003_INPUT_HIRAGANA_ONLY);
                 isValid = false;
             }
             else
@@ -368,19 +412,19 @@ namespace EmployeeManagementSystem
             if (string.IsNullOrEmpty(txtKanaLastName.Text))
             {
                 // 空欄の場合のエラー設定
-                errorProvider.SetError(txtKanaLastName, "名（かな）は入力必須です。");
+                errorProvider.SetError(txtKanaLastName, ErrorMessages.ERR006_MISSING_KANA_LAST_NAME);
                 isValid = false;
             }
             else if (txtKanaFirstName.Text.Length > 25)
             {
                 // 文字数超過の場合のエラー設定
-                errorProvider.SetError(txtKanaFirstName, "名（かな）は25文字以内で入力してください。");
+                errorProvider.SetError(txtKanaFirstName, ErrorMessages.ERR005_KANA_LAST_NAME_LIMIT);
                 isValid = false;
             }
             else if (!System.Text.RegularExpressions.Regex.IsMatch(txtKanaLastName.Text, @"^[\u3041-\u3096ー]+$"))
             {
                 // 平仮名以外が含まれている場合のエラー設定
-                errorProvider.SetError(txtKanaLastName, "平仮名のみ入力してください。");
+                errorProvider.SetError(txtKanaLastName, ErrorMessages.ERR003_INPUT_HIRAGANA_ONLY);
                 isValid = false;
             }
             else
@@ -393,13 +437,13 @@ namespace EmployeeManagementSystem
             if (string.IsNullOrEmpty(txtFirstName.Text))
             {
                 // 空欄の場合のエラー設定
-                errorProvider.SetError(txtFirstName, "姓 は入力必須です。");
+                errorProvider.SetError(txtFirstName, ErrorMessages.ERR008_MISSING_FIRST_NAME);
                 isValid = false;
             }
             else if (txtFirstName.Text.Length > 25)
             {
                 // 文字数超過の場合のエラー設定
-                errorProvider.SetError(txtFirstName, "姓 は25文字以内で入力してください。");
+                errorProvider.SetError(txtFirstName, ErrorMessages.ERR007_FIRST_NAME_LIMIT);
                 isValid = false;
             }
             else
@@ -412,13 +456,13 @@ namespace EmployeeManagementSystem
             if (string.IsNullOrEmpty(txtLastName.Text))
             {
                 // 空欄の場合のエラー設定
-                errorProvider.SetError(txtLastName, "名 は入力必須です。");
+                errorProvider.SetError(txtLastName, ErrorMessages.ERR010_MISSING_LAST_NAME);
                 isValid = false;
             }
             else if (txtLastName.Text.Length > 25)
             {
                 // 文字数超過の場合のエラー設定
-                errorProvider.SetError(txtLastName, "名 は25文字以内で入力してください。");
+                errorProvider.SetError(txtLastName, ErrorMessages.ERR009_LAST_NAME_LIMIT);
                 isValid = false;
             }
             else
@@ -431,12 +475,12 @@ namespace EmployeeManagementSystem
             if (string.IsNullOrEmpty(txtMail.Text))
             {
                 // 空欄の場合のエラー設定
-                errorProvider.SetError(txtMail, "メールアドレス は入力必須です。");
+                errorProvider.SetError(txtMail, ErrorMessages.ERR011_MISSING_MAIL);
                 isValid = false;
             }
-            else if (!System.Text.RegularExpressions.Regex.IsMatch(txtMail.Text, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            else if (!System.Text.RegularExpressions.Regex.IsMatch(txtMail.Text, @"^[a-zA-Z][a-zA-Z0-9._-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
             {
-                errorProvider.SetError(txtMail, "有効なメールアドレスを入力してください。");
+                errorProvider.SetError(txtMail, ErrorMessages.ERR012_REQUIRED_VALID_MAIL);
                 isValid = false;
             }
             else
@@ -449,12 +493,12 @@ namespace EmployeeManagementSystem
             if (string.IsNullOrEmpty(txtPhoneNum.Text))
             {
                 // 空欄の場合のエラー設定
-                errorProvider.SetError(txtPhoneNum, "電話番号 は入力必須です。");
+                errorProvider.SetError(txtPhoneNum, ErrorMessages.ERR013_MISSING_PHONE_NUM);
                 isValid = false;
             }
             else if (!System.Text.RegularExpressions.Regex.IsMatch(txtPhoneNum.Text, @"^\d{2,4}-\d{2,4}-\d{4}$"))
             {
-                errorProvider.SetError(txtPhoneNum, "電話番号は「080-1234-5678」の形式で入力してください。");
+                errorProvider.SetError(txtPhoneNum, ErrorMessages.ERR014_REQUIRED_VALID_PHONE_NUM);
                 isValid = false;
             }
             else
@@ -467,7 +511,7 @@ namespace EmployeeManagementSystem
             if (string.IsNullOrEmpty(selectOffice.Text))
             {
                 // 空欄の場合のエラー設定
-                errorProvider.SetError(selectOffice, "拠点 は入力必須です。");
+                errorProvider.SetError(selectOffice, ErrorMessages.ERR015_MISSING_OFFICE);
                 isValid = false;
             }
             else
@@ -480,7 +524,7 @@ namespace EmployeeManagementSystem
             if (string.IsNullOrEmpty(selectPosition.Text))
             {
                 // 空欄の場合のエラー設定
-                errorProvider.SetError(selectPosition, "役職 は入力必須です。");
+                errorProvider.SetError(selectPosition, ErrorMessages.ERR017_MISSING_POSITION);
                 isValid = false;
             }
             else
