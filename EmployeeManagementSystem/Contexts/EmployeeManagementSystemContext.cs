@@ -21,6 +21,7 @@ namespace EmployeeManagementSystem.Contexts
         public DbSet<OperatorModel> Operator { get; set; } // Operation テーブル
         public DbSet<PositionModel> Position { get; set; } // Position テーブル
         public DbSet<OfficeModel> Office { get; set; } // Office テーブル
+        public DbSet<SessionModel> Session { get; set; } //Session テーブル
         public DbSet<EmployeeView> EmployeeView { get; set; }
 
 
@@ -44,18 +45,29 @@ namespace EmployeeManagementSystem.Contexts
                 .HasKey(op => op.operator_id); // Operatorテーブルの主キー
             modelBuilder.Entity<OperatorModel>()
                 .HasOne(op => op.EmployeeIdNavigation) // 外部キーとしてEmployeeIdを指定
-                .WithMany(e => e.Operators)
+                .WithMany(e => e.Operator)
                 .HasForeignKey(op => op.employee_id); // OperatorModelとEmployeeModelのリレーション
 
             // EmployeeModelの設定（スキーマ名: public, テーブル名: employee）
             modelBuilder.Entity<EmployeeModel>()
                 .ToTable("employee", "public");
 
+
+
             // EmployeeView をデータベースビューとして設定
             modelBuilder.Entity<EmployeeView>().ToView("EmployeeView"); // ビュー名を指定
 
             // EmployeeView のプライマリーキーを設定
             modelBuilder.Entity<EmployeeView>().HasKey(e => e.employee_id); // 正確なプロパティ名を使用
+
+            // SessionModelの設定（スキーマ名: public, テーブル名: session）
+            modelBuilder.Entity<SessionModel>()
+                .ToTable("session", "public")
+                .HasKey(s => s.session_id); // Sessionテーブルの主キー
+            modelBuilder.Entity<SessionModel>()
+                .HasOne(s => s.EmployeeIdNavigation) // 外部キーとしてEmployeeIdを指定
+                .WithMany(e => e.Session)
+                .HasForeignKey(s => s.employee_id); // SessionModelとEmployeeModelのリレーション
 
             // 親クラスの設定を呼び出し
             base.OnModelCreating(modelBuilder);

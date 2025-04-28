@@ -15,15 +15,25 @@ namespace EmployeeManagementSystem
 {
     public partial class ShowEmployeeInfoForm : Form
     {
-        public ShowEmployeeInfoForm()
+        //グリッドの結果が社員番号の昇順であるか否か
+        bool isAscendingOrderByEmpId = false;
+        private LoginForm loginForm;
+
+        public ShowEmployeeInfoForm(LoginForm loginForm)
         {
             InitializeComponent();
-
+            this.loginForm = loginForm;
+            this.Resize += (s, e) =>
+            {
+                dataGridViewEmployee.Size = new Size(this.Width - 15, this.Height - 150);
+            };
             this.Load += ShowEmployeeInfoForm_Load;
             this.dataGridViewEmployee.CellFormatting += DataGridViewEmployee_CellFormatting;
             this.dataGridViewEmployee.CellContentClick += DataGridViewEmployee_CellContentClick;
             this.btnConfirm.Click += BtnConfirm_Click;
             this.btnSearch.Click += BtnSearch_Click;
+            this.dataGridViewEmployee.ColumnHeaderMouseClick += dataGridView_EmployeeIdHeaderMouseClick;
+            this.FormClosing += CloseFrom;
 
             // 社員情報追加ボタンクリック
             btnShowEmployeeInfoDetail.Click += (s, e) =>
@@ -33,20 +43,34 @@ namespace EmployeeManagementSystem
             };
 
             //ログアウトボタンクリック
-            btnLogout.Click += (s, e) =>
-            {
-                // 現在のフォームを閉じる
-                this.Hide();
-
-                // ログインフォームを表示
-                LoginForm loginForm = new LoginForm();
-                loginForm.Show();
-            };
+            this.btnLogout.Click += BtnLogout_Click;
 
             // クリアボタンクリック
             btnClear.Click += BtnClear_Click;
 
         }
+
+
+        private void BtnLogout_Click(object sender, EventArgs e)
+        {
+            // 確認ダイアログを表示
+            DialogResult result = MessageBox.Show(
+                InformationMessages.INFO011_LOGOUT_CONFIRMATION,
+                InformationMessages.TITLE001_CONFIRMATION,
+                MessageBoxButtons.YesNo, // YesとNoボタンを表示
+                MessageBoxIcon.Warning  // 警告アイコンを表示
+            );
+
+            // ダイアログの結果に基づいて処理
+            if (result == DialogResult.Yes)
+            {
+                SessionManager.SetLogoutTime(); //ログアウト時間をDBにセット
+                SessionManager.Session_Clear(); //セッション情報をクリア
+                this.Close();// 現在のフォームを閉じる
+                loginForm.Show();// ログインフォームを再表示
+            }
+        }
+
 
         //<summary>
         //社員情報一覧表示画面を表示（ロード）するとき
@@ -126,13 +150,10 @@ namespace EmployeeManagementSystem
                     {
                         selectPosition.Items.Add(name);
                     }
-
-
-
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"データの読み込み中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"{ErrorMessages.ERR019_DATABASE_READ_ERROR} {ex.Message}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -149,26 +170,35 @@ namespace EmployeeManagementSystem
                 {
                     // データベースから従業員データ、拠点、役職を結合して取得
                     var employeeData = dbContext.EmployeeView
+                        .Where(e => e.status != 0)
                         .OrderBy(e => e.employee_id)
                         .ToList();
 
                     // データグリッドに表示
                     dataGridViewEmployee.DataSource = employeeData; // dataGridViewEmployee はグリッドコントロール
 
-                    // 各行のステータスを確認し、退職済の場合は読み取り専用に設定
+                    // 各行のセルのTagを初期化および設定
                     foreach (DataGridViewRow row in dataGridViewEmployee.Rows)
                     {
-                        var statusCell = row.Cells["status"]; // "status" 列を取得
+                        foreach (DataGridViewCell cell in row.Cells)
+                        {
+                            cell.Tag = cell.Value; // 現在の値をTagプロパティに設定
+                        }
+
+                        // "status"列の確認
+                        var statusCell = row.Cells["status"];
                         if (statusCell.Value != null && int.TryParse(statusCell.Value.ToString(), out int status) && status == 0)
                         {
                             row.ReadOnly = true; // 退職済の場合は行を読み取り専用に設定
                         }
                     }
-;
+
+                    isAscendingOrderByEmpId = true;
+                    //MessageBox.Show(chkRetired.Checked.ToString());
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"データの読み込み中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"{ErrorMessages.ERR019_DATABASE_READ_ERROR} {ex.Message}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -180,55 +210,139 @@ namespace EmployeeManagementSystem
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
-                //入力値チェック
-                bool isValid = true;
+                //グリッド結果に変更があり処理が成功したかどうか
+                bool successChanged = false;
+                // 変更された行をチェック
+                bool hasModified = false;
+
                 //該当エラーメッセージリスト
                 List<string> errorMessages = new List<string>();
 
+                // office_name列のデータ取得
+                var officeNames = dbContext.Office
+                        .Select(o => o.office_name)
+                        .ToList();
+                // position_name列のデータ取得
+                var positionNames = dbContext.Position
+                        .Select(o => o.position_name)
+                        .ToList();
+
                 foreach (DataGridViewRow row in dataGridViewEmployee.Rows)
                 {
-
                     // 変更された行をチェック
                     bool isModified = false;
-                    
+                    //入力値チェック
+                    bool isValid = true;
 
-
-                    foreach (DataGridViewCell cell in row.Cells)
+                    for (int i = 0; i < row.Cells.Count; i++)
                     {
-                        int i=1;
                         // 空白チェックをすべてのセルに対して実施
-                        if (cell.Value == null || string.IsNullOrWhiteSpace(cell.Value.ToString()))
+                        if (row.Cells[i].Value == null || string.IsNullOrWhiteSpace(row.Cells[i].Value.ToString()))
                         {
-                            //MessageBox.Show($"セル値: {cell.Value} - 型: {cell.Value?.GetType()}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            MessageBox.Show(ErrorMessages.ERR001_EMPTY_FIELD, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            MessageBox.Show(ErrorMessages.ERR001_EMPTY_FIELD, InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return; // メソッドを終了
                         }
-                        else if(row.Cells["kana_first_name"].Value.ToString().Length > 25)
+                        if (i == 1 && row.Cells[i].Value.ToString().Length > 25)
                         {
-                            row.Cells["kana_first_name"].Style.BackColor = Color.Red;　// 背景を赤く設定
-                            if (!errorMessages.Contains(ErrorMessages.ERR002_KANA_LAST_NAME_LIMIT)) // 重複防止
+                            row.Cells[i].Style.BackColor = Color.Red;
+                            if (!errorMessages.Contains(ErrorMessages.ERR007_FIRST_NAME_LIMIT))
                             {
-                                errorMessages.Add(ErrorMessages.ERR002_KANA_LAST_NAME_LIMIT);
+                                errorMessages.Add(ErrorMessages.ERR007_FIRST_NAME_LIMIT);
                             }
                             isValid = false;
-                            MessageBox.Show($"{i++}");
                         }
-                        else if (!System.Text.RegularExpressions.Regex.IsMatch(row.Cells["kana_first_name"].Value.ToString(), @"^[\u3041-\u3096ー]+$"))
+                        if (i == 2 && row.Cells[i].Value.ToString().Length > 25)
                         {
-                            row.Cells["kana_first_name"].Style.BackColor = Color.Red;
+                            row.Cells[i].Style.BackColor = Color.Red;
+                            if (!errorMessages.Contains(ErrorMessages.ERR009_LAST_NAME_LIMIT))
+                            {
+                                errorMessages.Add(ErrorMessages.ERR009_LAST_NAME_LIMIT);
+                            }
+                            isValid = false;
+                        }
+                        if (i == 3 && row.Cells[i].Value.ToString().Length > 25)
+                        {
+                            row.Cells[i].Style.BackColor = Color.Red;　// 背景を赤く設定
+                            if (!errorMessages.Contains(ErrorMessages.ERR002_KANA_FIRST_NAME_LIMIT)) // 重複防止
+                            {
+                                errorMessages.Add(ErrorMessages.ERR002_KANA_FIRST_NAME_LIMIT);
+                            }
+                            isValid = false;
+                        }
+                        if (i == 3 && !System.Text.RegularExpressions.Regex.IsMatch(row.Cells[i].Value.ToString(), @"^[\u3041-\u3096ー]+$"))
+                        {
+                            row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR003_INPUT_HIRAGANA_ONLY))
                             {
                                 errorMessages.Add(ErrorMessages.ERR003_INPUT_HIRAGANA_ONLY);
                             }
                             isValid = false;
                         }
-                        else if (cell.Value != cell.Tag)
+                        if (i == 4 && row.Cells[i].Value.ToString().Length > 25)
                         {
+                            row.Cells[i].Style.BackColor = Color.Red;
+                            if (!errorMessages.Contains(ErrorMessages.ERR005_KANA_LAST_NAME_LIMIT))
+                            {
+                                errorMessages.Add(ErrorMessages.ERR005_KANA_LAST_NAME_LIMIT);
+                            }
+                            isValid = false;
+                        }
+                        if (i == 4 && !System.Text.RegularExpressions.Regex.IsMatch(row.Cells[i].Value.ToString(), @"^[\u3041-\u3096ー]+$"))
+                        {
+                            row.Cells[i].Style.BackColor = Color.Red;
+                            if (!errorMessages.Contains(ErrorMessages.ERR003_INPUT_HIRAGANA_ONLY))
+                            {
+                                errorMessages.Add(ErrorMessages.ERR003_INPUT_HIRAGANA_ONLY);
+                            }
+                            isValid = false;
+                        }
+                        if (i == 5 && !System.Text.RegularExpressions.Regex.IsMatch(row.Cells[i].Value.ToString(), @"^[a-zA-Z][a-zA-Z0-9._-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
+                        {
+                            row.Cells[i].Style.BackColor = Color.Red;
+                            if (!errorMessages.Contains(ErrorMessages.ERR012_REQUIRED_VALID_MAIL))
+                            {
+                                errorMessages.Add(ErrorMessages.ERR012_REQUIRED_VALID_MAIL);
+                            }
+                            isValid = false;
+                        }
+                        if (i == 6 && !System.Text.RegularExpressions.Regex.IsMatch(row.Cells[i].Value.ToString(), @"^\d{2,4}-\d{2,4}-\d{4}$"))
+                        {
+                            MessageBox.Show(row.Cells[5].Value.ToString(), InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            row.Cells[i].Style.BackColor = Color.Red;
+                            if (!errorMessages.Contains(ErrorMessages.ERR014_REQUIRED_VALID_PHONE_NUM))
+                            {
+                                errorMessages.Add(ErrorMessages.ERR014_REQUIRED_VALID_PHONE_NUM);
+                            }
+                            isValid = false;
+                        }
+                        if (i == 8 && !officeNames.Contains(row.Cells[i].Value.ToString()))
+                        {
+                            row.Cells[i].Style.BackColor = Color.Red;
+                            if (!errorMessages.Contains(ErrorMessages.ERR016_LOCATION_NAME_INCORRECT))
+                            {
+                                errorMessages.Add(ErrorMessages.ERR016_LOCATION_NAME_INCORRECT);
+                            }
+                            isValid = false;
+                        }
+                        if (i == 9 && !positionNames.Contains(row.Cells[i].Value.ToString()))
+                        {
+                            row.Cells[i].Style.BackColor = Color.Red;
+                            if (!errorMessages.Contains(ErrorMessages.ERR018_POSITION_NAME_INCORRECT))
+                            {
+                                errorMessages.Add(ErrorMessages.ERR018_POSITION_NAME_INCORRECT);
+                            }
+                            isValid = false;
+                        }
+                        if (!row.Cells[i].Value.Equals(row.Cells[i].Tag))
+                        {
+                            // MessageBox.Show("row.Cells[i].Value;"+ $"{row.Cells[i].Value}" + "row.Cells[i].Tag" + $"{row.Cells[i].Tag}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            //MessageBox.Show("isModified" + $"{isModified}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             isModified = true;
+                            hasModified = true;
                         }
                     }
 
-                    if (!isModified && !isValid)
+                    if (!isModified)
                     {
                         continue;
                     }
@@ -244,7 +358,7 @@ namespace EmployeeManagementSystem
                     string office_name = row.Cells["office_name"].Value.ToString();
                     string position_name = row.Cells["position_name"].Value.ToString();
 
-                    
+
                     // データベースの更新
                     var employee = dbContext.Employee.SingleOrDefault(e => e.employee_id == employee_id);
                     if (employee != null && isValid)
@@ -258,42 +372,38 @@ namespace EmployeeManagementSystem
 
                         // office_name をもとに office_id を取得して更新
                         var office = dbContext.Office.SingleOrDefault(o => o.office_name == office_name);
-                        if (office != null)
-                        {
-                            employee.office_id = office.office_id;
-                        }
-                        else
-                        {
-                            MessageBox.Show($"拠点名 '{office_name}' が見つかりません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            continue;
-                        }
+                        employee.office_id = office.office_id;
+
 
                         // position_name をもとに position_id を取得して更新
                         var position = dbContext.Position.SingleOrDefault(p => p.position_name == position_name);
-                        if (position != null)
-                        {
-                            employee.position_id = position.position_id;
-                        }
-                        else
-                        {
-                            MessageBox.Show($"役職名 '{position_name}' が見つかりません。", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            continue;
-                        }
+                        employee.position_id = position.position_id;
 
                         // 更新を保存
                         dbContext.SaveChanges();
+                        LoadEmployeeData();
+                        successChanged = true;
 
-                    }  
+                    }
+                    else
+                    {
+                        successChanged = false;
+                    }
                 }
-                if (!isValid)
-                {
-                    DisplayErrorMessages(errorMessages);
-                    //MessageBox.Show($"{string.Join(Environment.NewLine, errorMessages)}", "入力エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-                else
+                if (!hasModified)
                 {
                     errorMessages = null;
                     txtErrorMessages.Visible = false;
+                    MessageBox.Show(InformationMessages.INFO008_NOTIFY_NO_CHANGE, InformationMessages.TITLE007_ATTENTION, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else if (successChanged)
+                {
+                    MessageBox.Show(InformationMessages.INFO007_UPDATE_SUCCESS, InformationMessages.TITLE006_UPDATED, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else if (!successChanged)
+                {
+                    DisplayErrorMessages(errorMessages);
+                    MessageBox.Show(ErrorMessages.ERR032_COULD_NOT_UPDATE, InformationMessages.TITLE008_UPDATE_FAILED, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
             }
         }
@@ -304,26 +414,36 @@ namespace EmployeeManagementSystem
         private void BtnConfirm_Click(object sender, EventArgs e)
         {
 
+            // 確認ダイアログを表示
+            DialogResult result = MessageBox.Show(
+                InformationMessages.INFO006_UPDATE_CONFIRMATION,
+                InformationMessages.TITLE001_CONFIRMATION,
+                MessageBoxButtons.YesNo, // YesとNoボタンを表示
+                MessageBoxIcon.Warning  // 警告アイコンを表示
+            );
 
-            try
+            // ダイアログの結果に基づいて処理
+            if (result == DialogResult.Yes)
             {
-                // UpdateDatabaseメソッドを呼び出してデータを保存
-                UpdateDatabase();
+                try
+                {
+                    // UpdateDatabaseメソッドを呼び出してデータを保存
+                    UpdateDatabase();
 
-                // ユーザーへの通知
-                MessageBox.Show("データが更新されました！", "更新成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                // エラーメッセージを表示
-                MessageBox.Show($"更新中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
+                }
+                catch (Exception ex)
+                {
+                    // エラーメッセージを表示
+                    MessageBox.Show($"{ErrorMessages.ERR031_DATA_UPDATE_ERROR} { ex.Message}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }  
         }
 
+        /// <summary>
+        /// 社員情報詳細画面や社員情報追加画面を閉じたとき、社員情報一覧表示画面を更新して表示する（このメソッドは他のFormで使用される）
+        /// </summary>
         internal void CheckIfFormClosed()
         {
-
-            // 必要な処理を実行 (例: グリッドを更新する)
             this.LoadEmployeeData();
 
         }
@@ -333,20 +453,45 @@ namespace EmployeeManagementSystem
         /// </summary>
         private void BtnSearch_Click(object sender, EventArgs e)
         {
-            string strEmployeeId = txtEmployeeId.Text; // 社員番号
+            char[] delimiters = new char[] { ' ', ',' };
+            List<String> strEmployeeId = txtEmployeeId.Text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).ToList(); // 社員番号
             string name = txtName.Text; // 名前
             string kanaName = txtKanaName.Text; // 名前（かな）
             string officeName = selectOffice.SelectedItem?.ToString(); // 拠点選択
             string positionName = selectPosition.SelectedItem?.ToString(); // 役職選択
 
-            // 検索処理を実行
-            SearchEmployeeData(strEmployeeId, name, kanaName, officeName, positionName);
+            List<int> employeeId = new List<int>();
+            try
+            {
+                foreach (var item in strEmployeeId)
+                {
+                    employeeId.Add(int.Parse(item));
+                }
+            }
+            catch (FormatException fe)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR024_REQUIRED_VALID_EMPLOYEE_IDS}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            catch (OverflowException oe)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR025_OVERFLOW_NUMBER}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+            catch (Exception ex)
+            {
+                //他エラーはBtnSearch_Clickメソッド処理を終了させる
+                return;
+            }
+
+                // 検索処理を実行
+                SearchEmployeeData(employeeId, name, kanaName, officeName, positionName);
         }
 
         /// <summary>
         /// 検索条件入力エリアのパラメーターを検索条件として、社員情報ビューから検索し結果を表示する
         /// </summary>
-        private void SearchEmployeeData(string strEmployeeId, string name, string kanaName, string officeName, string positionName)
+        private void SearchEmployeeData(List<int> employeeId, string name, string kanaName, string officeName, string positionName)
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
@@ -354,12 +499,14 @@ namespace EmployeeManagementSystem
                 {
                     // ベースクエリ
                     var query = dbContext.EmployeeView.AsQueryable();
-
-                    // 社員番号
-                    if (!string.IsNullOrEmpty(strEmployeeId))
+                    if (chkRetired.Checked)
                     {
-                        int employeeId = int.Parse(strEmployeeId);
-                        query = query.Where(e => e.employee_id == employeeId);
+                        query = query.Where(e => e.status == 0);
+                    }
+                    // 社員番号
+                    if (employeeId.Any())
+                    {
+                        query = query.Where(e => employeeId.Contains(e.employee_id)); 
                     }
 
                     // 名前（かな）
@@ -394,7 +541,7 @@ namespace EmployeeManagementSystem
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"検索中にエラーが発生しました: {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"{ErrorMessages.ERR020_ERROR_DURING_SEARCH} {ex.Message}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -406,6 +553,11 @@ namespace EmployeeManagementSystem
         /// <param name="e">クリックイベントのデータ</param>
         private void BtnClear_Click(object sender, EventArgs e)
         {
+            SearchAreaClear();
+        }
+
+        internal void SearchAreaClear()
+        {
             // テキストボックスをクリア
             txtEmployeeId.Text = string.Empty; // 社員番号
             txtName.Text = string.Empty; // 名前
@@ -414,6 +566,9 @@ namespace EmployeeManagementSystem
             // コンボボックスの選択をクリア
             selectOffice.SelectedIndex = -1; // 拠点
             selectPosition.SelectedIndex = -1; // 役職
+
+            // チェックボックスのチェックをクリア
+            chkRetired.Checked = false;
         }
 
         /// <summary>
@@ -441,6 +596,66 @@ namespace EmployeeManagementSystem
                 // 非表示にする（必要に応じて設定）
                 txtErrorMessages.Visible = false;
             }
+        }
+
+        /// <summary>
+        /// グリッドの社員番号のヘッダークリックでその項目の昇順、または降順のソートを行うメソッド
+        /// </summary>
+        private void dataGridView_EmployeeIdHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            using (var dbContext = new EmployeeManagementSystemContext())
+            {
+                if (isAscendingOrderByEmpId)
+                {
+                    try
+                    {
+                        // データベースから従業員データ、拠点、役職を結合して取得 (社員番号　降順）
+                        var employeeData = dbContext.EmployeeView
+                            .Where(e => e.status != 0)
+                            .OrderByDescending(e => e.employee_id)
+                            .ToList();
+
+                        // データグリッドに表示
+                        dataGridViewEmployee.DataSource = employeeData; // dataGridViewEmployee はグリッドコントロール
+
+                        // 各行のセルのTagを初期化および設定
+                        foreach (DataGridViewRow row in dataGridViewEmployee.Rows)
+                        {
+                            foreach (DataGridViewCell cell in row.Cells)
+                            {
+                                cell.Tag = cell.Value; // 現在の値をTagプロパティに設定
+                            }
+
+                            // "status"列の確認
+                            var statusCell = row.Cells["status"];
+                            if (statusCell.Value != null && int.TryParse(statusCell.Value.ToString(), out int status) && status == 0)
+                            {
+                                row.ReadOnly = true; // 退職済の場合は行を読み取り専用に設定
+                            }
+                        }
+
+                        isAscendingOrderByEmpId = false;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"{ErrorMessages.ERR019_DATABASE_READ_ERROR} {ex.Message}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+                else if (!isAscendingOrderByEmpId)
+                {
+                    LoadEmployeeData();
+                }
+            }
+        }
+
+        /// <summary>
+        /// ログアウトボタン以外でフォームを閉じたときのセッションの削除とログインフォームの表示メソッド
+        /// </summary>
+        private void CloseFrom(object sender, EventArgs e)
+        {
+            SessionManager.SetLogoutTime(); //ログアウト時間をDBにセット
+            SessionManager.Session_Clear(); //セッション情報をクリア
+            loginForm.Show();// ログインフォームを再表示
         }
     }
 }

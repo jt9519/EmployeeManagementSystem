@@ -30,13 +30,14 @@ namespace EmployeeManagementSystem
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             panel1 = new Panel();
             txtErrorMessages = new TextBox();
             btnConfirm = new Button();
             btnLogout = new Button();
             btnShowEmployeeInfoDetail = new Button();
             areaSearch = new Panel();
+            chkRetired = new CheckBox();
             btnClear = new Button();
             btnSearch = new Button();
             txtKanaName = new TextBox();
@@ -69,6 +70,7 @@ namespace EmployeeManagementSystem
             // 
             // panel1
             // 
+            panel1.AutoScroll = true;
             panel1.AutoSize = true;
             panel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             panel1.BackColor = Color.Azure;
@@ -95,7 +97,7 @@ namespace EmployeeManagementSystem
             txtErrorMessages.Multiline = true;
             txtErrorMessages.Name = "txtErrorMessages";
             txtErrorMessages.ReadOnly = true;
-            txtErrorMessages.Size = new Size(354, 37);
+            txtErrorMessages.Size = new Size(516, 37);
             txtErrorMessages.TabIndex = 6;
             txtErrorMessages.Visible = false;
             // 
@@ -139,6 +141,7 @@ namespace EmployeeManagementSystem
             areaSearch.AutoSize = true;
             areaSearch.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             areaSearch.BorderStyle = BorderStyle.FixedSingle;
+            areaSearch.Controls.Add(chkRetired);
             areaSearch.Controls.Add(btnClear);
             areaSearch.Controls.Add(btnSearch);
             areaSearch.Controls.Add(txtKanaName);
@@ -151,15 +154,25 @@ namespace EmployeeManagementSystem
             areaSearch.Controls.Add(lblSelectOffice);
             areaSearch.Controls.Add(selectOffice);
             areaSearch.Controls.Add(selectPosition);
-            areaSearch.Location = new Point(401, 55);
+            areaSearch.Location = new Point(344, 55);
             areaSearch.Margin = new Padding(2);
             areaSearch.Name = "areaSearch";
-            areaSearch.Size = new Size(799, 109);
+            areaSearch.Size = new Size(928, 111);
             areaSearch.TabIndex = 2;
+            // 
+            // chkRetired
+            // 
+            chkRetired.AutoSize = true;
+            chkRetired.Location = new Point(14, 10);
+            chkRetired.Name = "chkRetired";
+            chkRetired.Size = new Size(76, 24);
+            chkRetired.TabIndex = 12;
+            chkRetired.Text = "退職済";
+            chkRetired.UseVisualStyleBackColor = true;
             // 
             // btnClear
             // 
-            btnClear.Location = new Point(705, 30);
+            btnClear.Location = new Point(834, 32);
             btnClear.Margin = new Padding(2);
             btnClear.Name = "btnClear";
             btnClear.Size = new Size(90, 27);
@@ -169,7 +182,7 @@ namespace EmployeeManagementSystem
             // 
             // btnSearch
             // 
-            btnSearch.Location = new Point(705, 78);
+            btnSearch.Location = new Point(834, 75);
             btnSearch.Margin = new Padding(2);
             btnSearch.Name = "btnSearch";
             btnSearch.Size = new Size(90, 27);
@@ -180,7 +193,7 @@ namespace EmployeeManagementSystem
             // txtKanaName
             // 
             txtKanaName.BorderStyle = BorderStyle.FixedSingle;
-            txtKanaName.Location = new Point(498, 78);
+            txtKanaName.Location = new Point(615, 80);
             txtKanaName.Margin = new Padding(2);
             txtKanaName.Name = "txtKanaName";
             txtKanaName.Size = new Size(184, 27);
@@ -189,7 +202,7 @@ namespace EmployeeManagementSystem
             // txtName
             // 
             txtName.BorderStyle = BorderStyle.FixedSingle;
-            txtName.Location = new Point(498, 43);
+            txtName.Location = new Point(615, 44);
             txtName.Margin = new Padding(2);
             txtName.Name = "txtName";
             txtName.Size = new Size(184, 27);
@@ -198,7 +211,7 @@ namespace EmployeeManagementSystem
             // txtEmployeeId
             // 
             txtEmployeeId.BorderStyle = BorderStyle.FixedSingle;
-            txtEmployeeId.Location = new Point(498, 8);
+            txtEmployeeId.Location = new Point(615, 10);
             txtEmployeeId.Margin = new Padding(2);
             txtEmployeeId.Name = "txtEmployeeId";
             txtEmployeeId.Size = new Size(184, 27);
@@ -207,7 +220,7 @@ namespace EmployeeManagementSystem
             // lblSearchKanaName
             // 
             lblSearchKanaName.AutoSize = true;
-            lblSearchKanaName.Location = new Point(416, 80);
+            lblSearchKanaName.Location = new Point(518, 82);
             lblSearchKanaName.Margin = new Padding(2, 0, 2, 0);
             lblSearchKanaName.Name = "lblSearchKanaName";
             lblSearchKanaName.Size = new Size(94, 20);
@@ -217,7 +230,7 @@ namespace EmployeeManagementSystem
             // lblSearchName
             // 
             lblSearchName.AutoSize = true;
-            lblSearchName.Location = new Point(416, 48);
+            lblSearchName.Location = new Point(565, 48);
             lblSearchName.Margin = new Padding(2, 0, 2, 0);
             lblSearchName.Name = "lblSearchName";
             lblSearchName.Size = new Size(39, 20);
@@ -227,7 +240,7 @@ namespace EmployeeManagementSystem
             // lblSearchEmployeeId
             // 
             lblSearchEmployeeId.AutoSize = true;
-            lblSearchEmployeeId.Location = new Point(416, 13);
+            lblSearchEmployeeId.Location = new Point(538, 16);
             lblSearchEmployeeId.Margin = new Padding(2, 0, 2, 0);
             lblSearchEmployeeId.Name = "lblSearchEmployeeId";
             lblSearchEmployeeId.Size = new Size(69, 20);
@@ -237,7 +250,7 @@ namespace EmployeeManagementSystem
             // lblSelectPosition
             // 
             lblSelectPosition.AutoSize = true;
-            lblSelectPosition.Location = new Point(205, 11);
+            lblSelectPosition.Location = new Point(335, 14);
             lblSelectPosition.Margin = new Padding(2, 0, 2, 0);
             lblSelectPosition.Name = "lblSelectPosition";
             lblSelectPosition.Size = new Size(39, 20);
@@ -247,7 +260,7 @@ namespace EmployeeManagementSystem
             // lblSelectOffice
             // 
             lblSelectOffice.AutoSize = true;
-            lblSelectOffice.Location = new Point(14, 11);
+            lblSelectOffice.Location = new Point(128, 11);
             lblSelectOffice.Margin = new Padding(2, 0, 2, 0);
             lblSelectOffice.Name = "lblSelectOffice";
             lblSelectOffice.Size = new Size(39, 20);
@@ -257,7 +270,7 @@ namespace EmployeeManagementSystem
             // selectOffice
             // 
             selectOffice.FormattingEnabled = true;
-            selectOffice.Location = new Point(54, 9);
+            selectOffice.Location = new Point(169, 9);
             selectOffice.Margin = new Padding(2);
             selectOffice.Name = "selectOffice";
             selectOffice.Size = new Size(146, 28);
@@ -266,7 +279,7 @@ namespace EmployeeManagementSystem
             // selectPosition
             // 
             selectPosition.FormattingEnabled = true;
-            selectPosition.Location = new Point(248, 10);
+            selectPosition.Location = new Point(377, 11);
             selectPosition.Margin = new Padding(2);
             selectPosition.Name = "selectPosition";
             selectPosition.Size = new Size(146, 28);
@@ -278,14 +291,14 @@ namespace EmployeeManagementSystem
             dataGridViewEmployee.AllowUserToDeleteRows = false;
             dataGridViewEmployee.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.AllCells;
             dataGridViewEmployee.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = Color.Blue;
-            dataGridViewCellStyle1.Font = new Font("メイリオ", 10F, FontStyle.Bold);
-            dataGridViewCellStyle1.ForeColor = Color.White;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dataGridViewEmployee.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = Color.Blue;
+            dataGridViewCellStyle2.Font = new Font("メイリオ", 10F, FontStyle.Bold);
+            dataGridViewCellStyle2.ForeColor = Color.White;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
+            dataGridViewEmployee.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dataGridViewEmployee.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dataGridViewEmployee.Columns.AddRange(new DataGridViewColumn[] { employee_id, first_name, last_name, kana_first_name, kana_last_name, mail, phone_num, hire_date, office_name, position_name, status });
             dataGridViewEmployee.EditMode = DataGridViewEditMode.EditOnEnter;
@@ -294,7 +307,7 @@ namespace EmployeeManagementSystem
             dataGridViewEmployee.Margin = new Padding(2);
             dataGridViewEmployee.Name = "dataGridViewEmployee";
             dataGridViewEmployee.RowHeadersWidth = 62;
-            dataGridViewEmployee.Size = new Size(1304, 514);
+            dataGridViewEmployee.Size = new Size(panel1.Width - 10, panel1.Height - 100);
             dataGridViewEmployee.TabIndex = 1;
             // 
             // employee_id
@@ -451,5 +464,6 @@ namespace EmployeeManagementSystem
         private DataGridViewTextBoxColumn position_name;
         private DataGridViewTextBoxColumn status;
         private TextBox txtErrorMessages;
+        private CheckBox chkRetired;
     }
 }

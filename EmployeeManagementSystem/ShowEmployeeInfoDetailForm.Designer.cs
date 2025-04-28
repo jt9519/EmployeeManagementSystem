@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             panel1 = new Panel();
+            notifyEmployeeRetired = new TextBox();
+            btnClear = new Button();
             lblAppearHireDate = new Label();
             lblAppearEmployeeId = new Label();
             lbl = new Label();
@@ -54,7 +56,6 @@
             lblKanaFirstName = new Label();
             lblEmployeeId = new Label();
             label1 = new Label();
-            btnClear = new Button();
             panel1.SuspendLayout();
             SuspendLayout();
             // 
@@ -62,6 +63,7 @@
             // 
             panel1.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             panel1.BackColor = Color.Azure;
+            panel1.Controls.Add(notifyEmployeeRetired);
             panel1.Controls.Add(btnClear);
             panel1.Controls.Add(lblAppearHireDate);
             panel1.Controls.Add(lblAppearEmployeeId);
@@ -92,8 +94,31 @@
             panel1.Margin = new Padding(0);
             panel1.Name = "panel1";
             panel1.Padding = new Padding(2);
-            panel1.Size = new Size(912, 573);
+            panel1.Size = new Size(870, 800);
             panel1.TabIndex = 0;
+            // 
+            // notifyEmployeeRetired
+            // 
+            notifyEmployeeRetired.BackColor = Color.Azure;
+            notifyEmployeeRetired.BorderStyle = BorderStyle.None;
+            notifyEmployeeRetired.Font = new Font("Yu Gothic UI", 11F, FontStyle.Bold, GraphicsUnit.Point, 128);
+            notifyEmployeeRetired.ForeColor = Color.Red;
+            notifyEmployeeRetired.Location = new Point(229, 43);
+            notifyEmployeeRetired.Margin = new Padding(2);
+            notifyEmployeeRetired.Name = "notifyEmployeeRetired";
+            notifyEmployeeRetired.Size = new Size(442, 25);
+            notifyEmployeeRetired.TabIndex = 40;
+            notifyEmployeeRetired.Visible = false;
+            // 
+            // btnClear
+            // 
+            btnClear.Location = new Point(515, 380);
+            btnClear.Margin = new Padding(2);
+            btnClear.Name = "btnClear";
+            btnClear.Size = new Size(90, 27);
+            btnClear.TabIndex = 39;
+            btnClear.Text = "クリア";
+            btnClear.UseVisualStyleBackColor = true;
             // 
             // lblAppearHireDate
             // 
@@ -396,21 +421,15 @@
             label1.TabIndex = 1;
             label1.Text = "社員詳細情報";
             // 
-            // btnClear
-            // 
-            btnClear.Location = new Point(515, 380);
-            btnClear.Margin = new Padding(2);
-            btnClear.Name = "btnClear";
-            btnClear.Size = new Size(90, 27);
-            btnClear.TabIndex = 39;
-            btnClear.Text = "クリア";
-            btnClear.UseVisualStyleBackColor = true;
-            // 
             // ShowEmployeeInfoDetailForm
             // 
+            
+            ClientSize = new Size(870, 800); // フォームサイズを固定
+            FormBorderStyle = FormBorderStyle.FixedDialog; // サイズ変更を無効化
+            MaximizeBox = false; // 最大化ボタンを無効化
+            StartPosition = FormStartPosition.CenterScreen; // 画面中央に表示
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(912, 573);
             Controls.Add(panel1);
             Margin = new Padding(2);
             Name = "ShowEmployeeInfoDetailForm";
@@ -449,5 +468,6 @@
         private Label lbl;
         private Label lblAppearEmployeeId;
         private Label lblAppearHireDate;
+        private TextBox notifyEmployeeRetired;
     }
 }

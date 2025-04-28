@@ -50,7 +50,9 @@ namespace EmployeeManagementSystem.DataModel
 
 
 
-        public ICollection<OperatorModel> Operators { get; set; } = new List<OperatorModel>(); //OperatorModel とのリレーション (1対多)
+        public ICollection<OperatorModel> Operator { get; set; } = new List<OperatorModel>(); //OperatorModel とのリレーション (1対多)
+
+        public ICollection<SessionModel> Session { get; set; } = new List<SessionModel>(); //SessionModel とのリレーション (1対多)
 
     }
 }

@@ -59,6 +59,7 @@
             resources.ApplyResources(txtPassword, "txtPassword");
             txtPassword.BorderStyle = BorderStyle.FixedSingle;
             txtPassword.Name = "txtPassword";
+            txtPassword.UseSystemPasswordChar = true;
             // 
             // btnLogin
             // 
@@ -86,7 +87,8 @@
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
             Controls.Add(panelLogin);
-            FormBorderStyle = FormBorderStyle.FixedToolWindow;
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
             Name = "LoginForm";
             panelLogin.ResumeLayout(false);
             panelLogin.PerformLayout();
