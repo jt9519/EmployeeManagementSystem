@@ -102,10 +102,10 @@ namespace EmployeeManagementSystem
                 errorProvider.SetError(txtKanaLastName, ErrorMessages.ERR006_MISSING_KANA_LAST_NAME);
                 isValid = false;
             }
-            else if (txtKanaFirstName.Text.Length > 25)
+            else if (txtKanaLastName.Text.Length > 25)
             {
                 // 文字数超過の場合のエラー設定
-                errorProvider.SetError(txtKanaFirstName, ErrorMessages.ERR005_KANA_LAST_NAME_LIMIT);
+                errorProvider.SetError(txtKanaLastName, ErrorMessages.ERR005_KANA_LAST_NAME_LIMIT);
                 isValid = false;
             }
             else if (!System.Text.RegularExpressions.Regex.IsMatch(txtKanaLastName.Text, @"^[\u3041-\u3096ー]+$"))

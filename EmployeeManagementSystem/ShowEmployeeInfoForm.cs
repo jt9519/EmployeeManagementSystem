@@ -10,6 +10,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Xml.Linq;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace EmployeeManagementSystem
 {
@@ -17,6 +19,7 @@ namespace EmployeeManagementSystem
     {
         //グリッドの結果が社員番号の昇順であるか否か
         bool isAscendingOrderByEmpId = false;
+        bool isSearching = false;
         private LoginForm loginForm;
 
         public ShowEmployeeInfoForm(LoginForm loginForm)
@@ -99,7 +102,7 @@ namespace EmployeeManagementSystem
         }
 
         /// <summary>
-        /// 検索エリアの拠点と役職のコンボボックスに値を挿入する
+        /// 社員番号リンククリック時、その社員番号の社員情報詳細画面を表示
         /// </summary>
         private void DataGridViewEmployee_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
@@ -170,7 +173,7 @@ namespace EmployeeManagementSystem
                 {
                     // データベースから従業員データ、拠点、役職を結合して取得
                     var employeeData = dbContext.EmployeeView
-                        .Where(e => e.status != 0)
+                        .Where(e => e.status == 1)
                         .OrderBy(e => e.employee_id)
                         .ToList();
 
@@ -183,13 +186,6 @@ namespace EmployeeManagementSystem
                         foreach (DataGridViewCell cell in row.Cells)
                         {
                             cell.Tag = cell.Value; // 現在の値をTagプロパティに設定
-                        }
-
-                        // "status"列の確認
-                        var statusCell = row.Cells["status"];
-                        if (statusCell.Value != null && int.TryParse(statusCell.Value.ToString(), out int status) && status == 0)
-                        {
-                            row.ReadOnly = true; // 退職済の場合は行を読み取り専用に設定
                         }
                     }
 
@@ -453,8 +449,12 @@ namespace EmployeeManagementSystem
         /// </summary>
         private void BtnSearch_Click(object sender, EventArgs e)
         {
+            txtErrorMessages.Visible = false; //更新時のエラーがある状態で検索ボタン押下したときエラーメッセージを非表示化
+            dataGridViewEmployee.Location = new Point(0, 220);
+
             char[] delimiters = new char[] { ' ', ',' };
             List<String> strEmployeeId = txtEmployeeId.Text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).ToList(); // 社員番号
+            bool isCheckedRetired = chkRetired.Checked;
             string name = txtName.Text; // 名前
             string kanaName = txtKanaName.Text; // 名前（かな）
             string officeName = selectOffice.SelectedItem?.ToString(); // 拠点選択
@@ -484,14 +484,23 @@ namespace EmployeeManagementSystem
                 return;
             }
 
+            if(CheckIsSearching(isCheckedRetired, employeeId, name, kanaName, officeName, positionName))
+            {
                 // 検索処理を実行
-                SearchEmployeeData(employeeId, name, kanaName, officeName, positionName);
+                SearchEmployeeData(isCheckedRetired, employeeId, name, kanaName, officeName, positionName);
+            }
+            else
+            {
+                LoadEmployeeData();
+            }
+
+            
         }
 
         /// <summary>
         /// 検索条件入力エリアのパラメーターを検索条件として、社員情報ビューから検索し結果を表示する
         /// </summary>
-        private void SearchEmployeeData(List<int> employeeId, string name, string kanaName, string officeName, string positionName)
+        private void SearchEmployeeData(bool isCheckedRetired, List<int> employeeId, string name, string kanaName, string officeName, string positionName)
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
@@ -499,14 +508,15 @@ namespace EmployeeManagementSystem
                 {
                     // ベースクエリ
                     var query = dbContext.EmployeeView.AsQueryable();
-                    if (chkRetired.Checked)
+                    if (isCheckedRetired)
                     {
                         query = query.Where(e => e.status == 0);
                     }
+
                     // 社員番号
                     if (employeeId.Any())
                     {
-                        query = query.Where(e => employeeId.Contains(e.employee_id)); 
+                        query = query.Where(e => employeeId.Contains(e.employee_id));
                     }
 
                     // 名前（かな）
@@ -538,6 +548,22 @@ namespace EmployeeManagementSystem
 
                     // グリッドに結果を表示
                     dataGridViewEmployee.DataSource = results;
+
+                    // 各行のセルのTagを初期化および設定
+                    foreach (DataGridViewRow row in dataGridViewEmployee.Rows)
+                    {
+                        foreach (DataGridViewCell cell in row.Cells)
+                        {
+                            cell.Tag = cell.Value; // 現在の値をTagプロパティに設定
+                        }
+
+                        // "status"列の確認
+                        var statusCell = row.Cells["status"];
+                        if (statusCell.Value != null && int.TryParse(statusCell.Value.ToString(), out int status) && status == 0)
+                        {
+                            row.ReadOnly = true; // 退職済の場合は行を読み取り専用に設定
+                        }
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -605,46 +631,43 @@ namespace EmployeeManagementSystem
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
-                if (isAscendingOrderByEmpId)
+                if (!isSearching)
                 {
-                    try
+                    if (isAscendingOrderByEmpId)
                     {
-                        // データベースから従業員データ、拠点、役職を結合して取得 (社員番号　降順）
-                        var employeeData = dbContext.EmployeeView
-                            .Where(e => e.status != 0)
-                            .OrderByDescending(e => e.employee_id)
-                            .ToList();
-
-                        // データグリッドに表示
-                        dataGridViewEmployee.DataSource = employeeData; // dataGridViewEmployee はグリッドコントロール
-
-                        // 各行のセルのTagを初期化および設定
-                        foreach (DataGridViewRow row in dataGridViewEmployee.Rows)
+                        try
                         {
-                            foreach (DataGridViewCell cell in row.Cells)
+                            // データベースから従業員データ、拠点、役職を結合して取得 (社員番号　降順）
+                            var employeeData = dbContext.EmployeeView
+                                .Where(e => e.status != 0)
+                                .OrderByDescending(e => e.employee_id)
+                                .ToList();
+
+                            // データグリッドに表示
+                            dataGridViewEmployee.DataSource = employeeData; // dataGridViewEmployee はグリッドコントロール
+
+                            // 各行のセルのTagを初期化および設定
+                            foreach (DataGridViewRow row in dataGridViewEmployee.Rows)
                             {
-                                cell.Tag = cell.Value; // 現在の値をTagプロパティに設定
+                                foreach (DataGridViewCell cell in row.Cells)
+                                {
+                                    cell.Tag = cell.Value; // 現在の値をTagプロパティに設定
+                                }
                             }
 
-                            // "status"列の確認
-                            var statusCell = row.Cells["status"];
-                            if (statusCell.Value != null && int.TryParse(statusCell.Value.ToString(), out int status) && status == 0)
-                            {
-                                row.ReadOnly = true; // 退職済の場合は行を読み取り専用に設定
-                            }
+                            isAscendingOrderByEmpId = false;
                         }
-
-                        isAscendingOrderByEmpId = false;
+                        catch (Exception ex)
+                        {
+                            MessageBox.Show($"{ErrorMessages.ERR019_DATABASE_READ_ERROR} {ex.Message}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        }
                     }
-                    catch (Exception ex)
+                    else if (!isAscendingOrderByEmpId)
                     {
-                        MessageBox.Show($"{ErrorMessages.ERR019_DATABASE_READ_ERROR} {ex.Message}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        LoadEmployeeData();
                     }
                 }
-                else if (!isAscendingOrderByEmpId)
-                {
-                    LoadEmployeeData();
-                }
+                return;
             }
         }
 
@@ -656,6 +679,50 @@ namespace EmployeeManagementSystem
             SessionManager.SetLogoutTime(); //ログアウト時間をDBにセット
             SessionManager.Session_Clear(); //セッション情報をクリア
             loginForm.Show();// ログインフォームを再表示
+        }
+
+        private bool CheckIsSearching(bool isCheckedRetired, List<int> employeeId, string name, string kanaName, string officeName, string positionName)
+        {
+            if (isCheckedRetired)
+            {
+                isSearching = true;
+            }
+            else
+            {
+                isSearching = false;
+            }
+
+            // 社員番号
+            if (employeeId.Any())
+            {
+                isSearching = true;
+            }
+
+            // 名前（かな）
+            if (!string.IsNullOrEmpty(kanaName))
+            {
+                isSearching = true;
+            }
+
+            // 名前
+            if (!string.IsNullOrEmpty(name))
+            {
+                isSearching = true;
+            }
+
+            // 拠点
+            if (!string.IsNullOrEmpty(officeName))
+            {
+                isSearching = true;
+            }
+
+            // 役職
+            if (!string.IsNullOrEmpty(positionName))
+            {
+                isSearching = true;
+            }
+
+            return isSearching;
         }
     }
 }
