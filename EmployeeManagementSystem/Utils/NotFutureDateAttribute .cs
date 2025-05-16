@@ -9,8 +9,13 @@ namespace EmployeeManagementSystem.Utils
 {
     internal class NotFutureDateAttribute : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
+            if (value == null)
+            {
+                return new ValidationResult($"{ErrorMessages.ERR033_ERROR}"); 
+            }
+
             DateTime? inputDate = value as DateTime?;
 
             if (inputDate.HasValue && inputDate.Value > DateTime.Now)
@@ -19,6 +24,7 @@ namespace EmployeeManagementSystem.Utils
             }
 
             return ValidationResult.Success;
+
         }
     }
 }

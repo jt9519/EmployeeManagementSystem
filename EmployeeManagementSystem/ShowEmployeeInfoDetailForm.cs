@@ -61,8 +61,14 @@ namespace EmployeeManagementSystem
         }
 
         //フォームを閉じた後、社員情報一覧画面のグリッドの結果を更新する
-        private void ShowEmployeeInfoDetailForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void ShowEmployeeInfoDetailForm_FormClosing(object? sender, FormClosingEventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (parentForm != null)
             {
                 parentForm.SearchAreaClear();
@@ -75,8 +81,14 @@ namespace EmployeeManagementSystem
         // 初期値を保存するディクショナリ
         private Dictionary<string, string> initialValues = new Dictionary<string, string>();
 
-        private void ShowEmployeeInfoDetailForm_Load(object sender, EventArgs e)
+        private void ShowEmployeeInfoDetailForm_Load(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             setConboBoxData();
             LoadEmployeeDetails(EmployeeId);
 
@@ -209,8 +221,14 @@ namespace EmployeeManagementSystem
 
 
 
-        private void btnUpdate_Click(object sender, EventArgs e)
+        private void btnUpdate_Click(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             // 現在の値を収集
             var currentValues = new Dictionary<string, string>
             {
@@ -303,8 +321,14 @@ namespace EmployeeManagementSystem
         }
 
         //クリアボタンクリック時のメソッド
-        private void btnClear_Click(object sender, EventArgs e)
+        private void btnClear_Click(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             //元のデータをセット
             LoadEmployeeDetails(EmployeeId);
 
@@ -320,8 +344,14 @@ namespace EmployeeManagementSystem
         }
 
         //削除ボタンクリック時のメソッド
-        private void btnDelete_Click(object sender, EventArgs e)
+        private void btnDelete_Click(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             // 確認ダイアログの表示
             DialogResult result = MessageBox.Show(
                 InformationMessages.INFO004_DELETE_CONFIRMATION,
