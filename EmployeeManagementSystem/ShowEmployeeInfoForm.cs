@@ -13,6 +13,10 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
+#pragma warning disable CS8600
+#pragma warning disable CS8601
+#pragma warning disable CS8602
+
 namespace EmployeeManagementSystem
 {
     public partial class ShowEmployeeInfoForm : Form
@@ -54,8 +58,15 @@ namespace EmployeeManagementSystem
         }
 
 
-        private void BtnLogout_Click(object sender, EventArgs e)
+        private void BtnLogout_Click(object? sender, EventArgs e)
         {
+
+            if(sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             // 確認ダイアログを表示
             DialogResult result = MessageBox.Show(
                 InformationMessages.INFO011_LOGOUT_CONFIRMATION,
@@ -80,8 +91,14 @@ namespace EmployeeManagementSystem
         //Set_conboBoxDataメソッドで検索エリアのコンボボックスに値を挿入し、
         //LoadEmployeeDataメソッドでグリッドの結果に社員情報を表示する
         //</summary>
-        private void ShowEmployeeInfoForm_Load(object sender, EventArgs e)
+        private void ShowEmployeeInfoForm_Load(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             Set_conboBoxData(); //検索エリアのコンボボックスにデータセット
             LoadEmployeeData(); // データを読み込み表示
         }
@@ -89,8 +106,14 @@ namespace EmployeeManagementSystem
         //<summary>
         //statusカラム表示変換のためのフォーマッター
         //</summary>
-        private void DataGridViewEmployee_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
+        private void DataGridViewEmployee_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (dataGridViewEmployee.Columns[e.ColumnIndex].Name == "status") // ステータス列を特定
             {
                 if (e.Value != null)
@@ -104,13 +127,19 @@ namespace EmployeeManagementSystem
         /// <summary>
         /// 社員番号リンククリック時、その社員番号の社員情報詳細画面を表示
         /// </summary>
-        private void DataGridViewEmployee_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        private void DataGridViewEmployee_CellContentClick(object? sender, DataGridViewCellEventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             // リンクがクリックされたかを確認
             if (dataGridViewEmployee.Columns[e.ColumnIndex] is DataGridViewLinkColumn && e.RowIndex >= 0)
             {
                 // クリックされた行の社員番号を取得
-                string employeeId = dataGridViewEmployee.Rows[e.RowIndex].Cells["employee_id"].Value?.ToString();
+                string? employeeId = dataGridViewEmployee.Rows[e.RowIndex].Cells["employee_id"].Value?.ToString();
 
                 if (!string.IsNullOrEmpty(employeeId))
                 {
@@ -232,13 +261,17 @@ namespace EmployeeManagementSystem
 
                     for (int i = 0; i < row.Cells.Count; i++)
                     {
+                        var cellValue = row.Cells[i].Value;
+
+
                         // 空白チェックをすべてのセルに対して実施
-                        if (row.Cells[i].Value == null || string.IsNullOrWhiteSpace(row.Cells[i].Value.ToString()))
+                        if (cellValue == null || string.IsNullOrWhiteSpace(cellValue?.ToString()))
                         {
                             MessageBox.Show(ErrorMessages.ERR001_EMPTY_FIELD, InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return; // メソッドを終了
                         }
-                        if (i == 1 && row.Cells[i].Value.ToString().Length > 25)
+
+                        if (i == 1 && cellValue.ToString()?.Length > 25)
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR007_FIRST_NAME_LIMIT))
@@ -247,7 +280,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (i == 2 && row.Cells[i].Value.ToString().Length > 25)
+                        if (i == 2 && cellValue.ToString()?.Length > 25)
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR009_LAST_NAME_LIMIT))
@@ -256,7 +289,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (i == 3 && row.Cells[i].Value.ToString().Length > 25)
+                        if (i == 3 && cellValue.ToString()?.Length > 25)
                         {
                             row.Cells[i].Style.BackColor = Color.Red;　// 背景を赤く設定
                             if (!errorMessages.Contains(ErrorMessages.ERR002_KANA_FIRST_NAME_LIMIT)) // 重複防止
@@ -265,7 +298,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (i == 3 && !System.Text.RegularExpressions.Regex.IsMatch(row.Cells[i].Value.ToString(), @"^[\u3041-\u3096ー]+$"))
+                        if (i == 3 && !System.Text.RegularExpressions.Regex.IsMatch(cellValue?.ToString()?? "", @"^[\u3041-\u3096ー]+$"))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR003_INPUT_HIRAGANA_ONLY))
@@ -274,7 +307,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (i == 4 && row.Cells[i].Value.ToString().Length > 25)
+                        if (i == 4 && cellValue.ToString()?.Length > 25)
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR005_KANA_LAST_NAME_LIMIT))
@@ -283,7 +316,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (i == 4 && !System.Text.RegularExpressions.Regex.IsMatch(row.Cells[i].Value.ToString(), @"^[\u3041-\u3096ー]+$"))
+                        if (i == 4 && !System.Text.RegularExpressions.Regex.IsMatch(cellValue?.ToString() ?? "", @"^[\u3041-\u3096ー]+$"))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR003_INPUT_HIRAGANA_ONLY))
@@ -292,7 +325,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (i == 5 && !System.Text.RegularExpressions.Regex.IsMatch(row.Cells[i].Value.ToString(), @"^[a-zA-Z][a-zA-Z0-9._-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
+                        if (i == 5 && !System.Text.RegularExpressions.Regex.IsMatch(cellValue?.ToString()?? "", @"^[a-zA-Z][a-zA-Z0-9._-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR012_REQUIRED_VALID_MAIL))
@@ -301,7 +334,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (i == 6 && !System.Text.RegularExpressions.Regex.IsMatch(row.Cells[i].Value.ToString(), @"^\d{2,4}-\d{2,4}-\d{4}$"))
+                        if (i == 6 && !System.Text.RegularExpressions.Regex.IsMatch(cellValue?.ToString() ?? "", @"^\d{2,4}-\d{2,4}-\d{4}$"))
                         {
                             MessageBox.Show(row.Cells[5].Value.ToString(), InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             row.Cells[i].Style.BackColor = Color.Red;
@@ -311,7 +344,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (i == 8 && !officeNames.Contains(row.Cells[i].Value.ToString()))
+                        if (i == 8 && !officeNames.Contains(cellValue?.ToString() ?? InformationMessages.TITLE004_INPUT_ERROR))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR016_LOCATION_NAME_INCORRECT))
@@ -320,7 +353,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (i == 9 && !positionNames.Contains(row.Cells[i].Value.ToString()))
+                        if (i == 9 && !positionNames.Contains(cellValue?.ToString() ?? InformationMessages.TITLE004_INPUT_ERROR))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR018_POSITION_NAME_INCORRECT))
@@ -329,7 +362,6 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (!row.Cells[i].Value.Equals(row.Cells[i].Tag))
                         {
                             // MessageBox.Show("row.Cells[i].Value;"+ $"{row.Cells[i].Value}" + "row.Cells[i].Tag" + $"{row.Cells[i].Tag}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             //MessageBox.Show("isModified" + $"{isModified}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -355,36 +387,49 @@ namespace EmployeeManagementSystem
                     string position_name = row.Cells["position_name"].Value.ToString();
 
 
+
+
+
                     // データベースの更新
-                    var employee = dbContext.Employee.SingleOrDefault(e => e.employee_id == employee_id);
-                    if (employee != null && isValid)
+
+                    try
                     {
-                        employee.first_name = first_name;
-                        employee.last_name = last_name;
-                        employee.kana_first_name = kana_first_name;
-                        employee.kana_last_name = kana_last_name;
-                        employee.mail = mail;
-                        employee.phone_num = phone_num;
+                        var employee = dbContext.Employee.SingleOrDefault(e => e.employee_id == employee_id);
+                        if (employee != null && isValid)
+                        {
 
-                        // office_name をもとに office_id を取得して更新
-                        var office = dbContext.Office.SingleOrDefault(o => o.office_name == office_name);
-                        employee.office_id = office.office_id;
+                            employee.first_name = first_name;
+                            employee.last_name = last_name;
+                            employee.kana_first_name = kana_first_name;
+                            employee.kana_last_name = kana_last_name;
+                            employee.mail = mail;
+                            employee.phone_num = phone_num;
 
 
-                        // position_name をもとに position_id を取得して更新
-                        var position = dbContext.Position.SingleOrDefault(p => p.position_name == position_name);
-                        employee.position_id = position.position_id;
+                            // office_name をもとに office_id を取得して更新
+                            var office = dbContext.Office.SingleOrDefault(o => o.office_name == office_name);
+                            employee.office_id = office.office_id;
 
-                        // 更新を保存
-                        dbContext.SaveChanges();
-                        LoadEmployeeData();
-                        successChanged = true;
+                            // position_name をもとに position_id を取得して更新
+                            var position = dbContext.Position.SingleOrDefault(p => p.position_name == position_name);
+                            employee.position_id = position.position_id;
 
+                            // 更新を保存
+                            dbContext.SaveChanges();
+                            LoadEmployeeData();
+                            successChanged = true;
+
+                        }
+                        else
+                        {
+                            successChanged = false;
+                        }
                     }
-                    else
+                    catch(Exception ex)
                     {
-                        successChanged = false;
+                        MessageBox.Show($"{ErrorMessages.ERR033_ERROR} {ex.Message}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
+                    
                 }
                 if (!hasModified)
                 {
@@ -407,8 +452,13 @@ namespace EmployeeManagementSystem
         /// <summary>
         /// 確定ボタンクリックで、更新処理であるUpdateDatabaseを実行し、成功したかどうかメッセージで知らせる
         /// </summary>
-        private void BtnConfirm_Click(object sender, EventArgs e)
+        private void BtnConfirm_Click(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
             // 確認ダイアログを表示
             DialogResult result = MessageBox.Show(
@@ -447,13 +497,19 @@ namespace EmployeeManagementSystem
         /// <summary>
         /// 検索エリアの入力値を収集してSearchEmployeeDataメソッドを実行
         /// </summary>
-        private void BtnSearch_Click(object sender, EventArgs e)
+        private void BtnSearch_Click(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             txtErrorMessages.Visible = false; //更新時のエラーがある状態で検索ボタン押下したときエラーメッセージを非表示化
             dataGridViewEmployee.Location = new Point(0, 220);
 
             char[] delimiters = new char[] { ' ', ',' };
-            List<String> strEmployeeId = txtEmployeeId.Text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).ToList(); // 社員番号
+            List<string> strEmployeeId = txtEmployeeId.Text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).ToList(); // 社員番号
             bool isCheckedRetired = chkRetired.Checked;
             string name = txtName.Text; // 名前
             string kanaName = txtKanaName.Text; // 名前（かな）
@@ -470,21 +526,27 @@ namespace EmployeeManagementSystem
             }
             catch (FormatException fe)
             {
+                Console.WriteLine($"{fe.Message}");
+
                 MessageBox.Show($"{ErrorMessages.ERR024_REQUIRED_VALID_EMPLOYEE_IDS}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             catch (OverflowException oe)
             {
+                Console.WriteLine($"{oe.Message}");
+
                 MessageBox.Show($"{ErrorMessages.ERR025_OVERFLOW_NUMBER}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"{ex.Message}");
+
                 //他エラーはBtnSearch_Clickメソッド処理を終了させる
                 return;
             }
 
-            if(CheckIsSearching(isCheckedRetired, employeeId, name, kanaName, officeName, positionName))
+            if(CheckIsSearching(isCheckedRetired, employeeId, name, kanaName, officeName ?? "", positionName?? ""))
             {
                 // 検索処理を実行
                 SearchEmployeeData(isCheckedRetired, employeeId, name, kanaName, officeName, positionName);
@@ -500,7 +562,7 @@ namespace EmployeeManagementSystem
         /// <summary>
         /// 検索条件入力エリアのパラメーターを検索条件として、社員情報ビューから検索し結果を表示する
         /// </summary>
-        private void SearchEmployeeData(bool isCheckedRetired, List<int> employeeId, string name, string kanaName, string officeName, string positionName)
+        private void SearchEmployeeData(bool isCheckedRetired, List<int> employeeId, string? name, string? kanaName, string? officeName, string? positionName)
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
@@ -577,8 +639,14 @@ namespace EmployeeManagementSystem
         /// </summary>
         /// <param name="sender">クリアボタンがクリックされたコントロール</param>
         /// <param name="e">クリックイベントのデータ</param>
-        private void BtnClear_Click(object sender, EventArgs e)
+        private void BtnClear_Click(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             SearchAreaClear();
         }
 
@@ -627,8 +695,14 @@ namespace EmployeeManagementSystem
         /// <summary>
         /// グリッドの社員番号のヘッダークリックでその項目の昇順、または降順のソートを行うメソッド
         /// </summary>
-        private void dataGridView_EmployeeIdHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        private void dataGridView_EmployeeIdHeaderMouseClick(object? sender, DataGridViewCellMouseEventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             using (var dbContext = new EmployeeManagementSystemContext())
             {
                 if (!isSearching)
@@ -674,8 +748,14 @@ namespace EmployeeManagementSystem
         /// <summary>
         /// ログアウトボタン以外でフォームを閉じたときのセッションの削除とログインフォームの表示メソッド
         /// </summary>
-        private void CloseFrom(object sender, EventArgs e)
+        private void CloseFrom(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             SessionManager.SetLogoutTime(); //ログアウト時間をDBにセット
             SessionManager.Session_Clear(); //セッション情報をクリア
             loginForm.Show();// ログインフォームを再表示

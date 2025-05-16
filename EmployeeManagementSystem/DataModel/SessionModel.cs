@@ -19,16 +19,16 @@ namespace EmployeeManagementSystem.DataModel
         
         public DateTime? logout_time { get; set; } // ログアウト時間（null可能）
         
-        public string session_token { get; set; } // セッショントークン
+        public string? session_token { get; set; } // セッショントークン
         
-        public string ip_address { get; set; } // IPアドレス
+        public string? ip_address { get; set; } // IPアドレス
       
-        public string user_agent { get; set; } // ブラウザ・デバイス情報
+        public string? user_agent { get; set; } // ブラウザ・デバイス情報
 
         public bool is_active { get; set; } // アクティブ状態（1: アクティブ, 0: 非アクティブ）
 
 
 
-        public required EmployeeModel EmployeeIdNavigation { get; set; }
+        public required EmployeeModel? EmployeeIdNavigation { get; set; }
     }
 }

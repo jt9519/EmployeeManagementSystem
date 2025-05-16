@@ -8,6 +8,7 @@ using EmployeeManagementSystem.DataModel;
 using System.Timers;
 using Timer = System.Timers.Timer;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.ComponentModel.DataAnnotations;
 
 
 namespace EmployeeManagementSystem.Utils
@@ -22,17 +23,17 @@ namespace EmployeeManagementSystem.Utils
 
         public static DateTime? logout_time { get; set; } // ログアウト時間（null可能）
 
-        public static string session_token { get; set; } // セッショントークン
+        public static string? session_token { get; set; } // セッショントークン
 
-        public static string ip_address { get; set; } // IPアドレス
+        public static string? ip_address { get; set; } // IPアドレス
 
-        public static string user_agent { get; set; } // ブラウザ・デバイス情報
+        public static string? user_agent { get; set; } // ブラウザ・デバイス情報
 
         public static bool is_active { get; set; } // アクティブ状態（1: アクティブ, 0: 非アクティブ）
 
 
         // タイムアウト時間（30分）
-        private static Timer sessionTimer;
+        private static Timer? sessionTimer;
         private static readonly int TimeoutDurationInMinutes = 30;
 
         public static void StartSession()
@@ -46,8 +47,14 @@ namespace EmployeeManagementSystem.Utils
         }
 
 
-        private static void OnSessionTimeout(object sender, ElapsedEventArgs e)
+        private static void OnSessionTimeout(object? sender, ElapsedEventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             MessageBox.Show(InformationMessages.INFO002_NOTIFY_SESSION_TIMEOUT, InformationMessages.TITLE003_SESSION_TIMEOUT, MessageBoxButtons.OK, MessageBoxIcon.Information);
             SetLogoutTime();
             Session_Clear();
@@ -83,7 +90,7 @@ namespace EmployeeManagementSystem.Utils
                 catch (Exception ex)
                 {
                     // 例外処理
-                    //MessageBox.Show($"{ErrorMessages.ERR019_DATABASE_READ_ERROR} {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show($"{ErrorMessages.ERR019_DATABASE_READ_ERROR} {ex.Message}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
