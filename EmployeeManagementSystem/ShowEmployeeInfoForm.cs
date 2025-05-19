@@ -336,7 +336,6 @@ namespace EmployeeManagementSystem
                         }
                         if (i == 6 && !System.Text.RegularExpressions.Regex.IsMatch(cellValue?.ToString() ?? "", @"^\d{2,4}-\d{2,4}-\d{4}$"))
                         {
-                            MessageBox.Show(row.Cells[5].Value.ToString(), InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR014_REQUIRED_VALID_PHONE_NUM))
                             {
@@ -362,6 +361,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
+                        if (!cellValue.Equals(row.Cells[i].Tag))
                         {
                             // MessageBox.Show("row.Cells[i].Value;"+ $"{row.Cells[i].Value}" + "row.Cells[i].Tag" + $"{row.Cells[i].Tag}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             //MessageBox.Show("isModified" + $"{isModified}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
