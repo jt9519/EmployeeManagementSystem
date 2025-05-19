@@ -27,9 +27,15 @@ namespace EmployeeManagementSystem
 
         }
 
-        private void btnLogin_click(object sender, EventArgs e)
+        private void btnLogin_click(object? sender, EventArgs e)
         {
             {
+                if(sender == null)
+                {
+                    MessageBox.Show($"{ErrorMessages.ERR019_DATABASE_READ_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 // 入力値を取得
                 string inputMail = txtMail.Text;
                 string inputPassword = txtPassword.Text;
@@ -66,11 +72,11 @@ namespace EmployeeManagementSystem
 
                                 //セッション情報の作成
                                 int employeeId = operatorRecord.Operator.employee_id;
-                                String session_token = CreateSession(employeeId);
+                                string? session_token = CreateSession(employeeId);
                                 
                                 if(session_token != null)
                                 {
-                                    SessionModel sessionData = GetSessionRecordData(session_token);
+                                    SessionModel? sessionData = GetSessionRecordData(session_token);
                                     SetSession(sessionData);
                                     SessionManager.StartSession(); // セッションを開始
                                     Clear_Inputs();
@@ -101,7 +107,7 @@ namespace EmployeeManagementSystem
             }
         }
 
-        private List<String> IsValidInput(String password, String mail)
+        private List<string> IsValidInput(string password, string mail)
         {
             List<string> isValidInput_ErrorMessages = new List<string>();
 
@@ -122,7 +128,7 @@ namespace EmployeeManagementSystem
         private void DisplayErrorMessages(List<string> errorMessages)
         {
             // エラーメッセージを改行で区切って結合
-            String messages = string.Join(Environment.NewLine, errorMessages);
+            string messages = string.Join(Environment.NewLine, errorMessages);
             MessageBox.Show(messages, InformationMessages.TITLE004_INPUT_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
         }
@@ -134,15 +140,15 @@ namespace EmployeeManagementSystem
             txtPassword.Text = null;
         }
 
-        private String CreateSession(int employeeId)
+        private string? CreateSession(int employeeId)
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
                 try
                 {
-                    String ip_address = GetIpAddress();
-                    String user_agent = GetUserAgent();
-                    String session_token = Guid.NewGuid().ToString();
+                    string ip_address = GetIpAddress();
+                    string user_agent = GetUserAgent();
+                    string session_token = Guid.NewGuid().ToString();
                     DateTime login_time = DateTime.Now;
 
                     // 新しいセッションを作成
@@ -190,12 +196,12 @@ namespace EmployeeManagementSystem
                 }
 
                 // User-Agentを取得
-                dynamic script = browser.Document.DomDocument;
+                dynamic? script = browser.Document?.DomDocument;
                 return script?.parentWindow?.navigator?.userAgent ?? "不明";
             }
         }
 
-        private SessionModel GetSessionRecordData(String session_token)
+        private SessionModel? GetSessionRecordData(string? session_token)
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
@@ -217,15 +223,19 @@ namespace EmployeeManagementSystem
             }
         }
 
-        private void SetSession(SessionModel sessionModel)
+        private void SetSession(SessionModel? sessionModel)
         {
-            SessionManager.session_id = sessionModel.session_id;
-            SessionManager.employee_id = sessionModel.employee_id;
-            SessionManager.login_time = sessionModel.login_time;
-            SessionManager.session_token = sessionModel.session_token;
-            SessionManager.ip_address = sessionModel.ip_address;
-            SessionManager.user_agent = sessionModel.user_agent;
-            SessionManager.is_active = sessionModel.is_active;
+            if (sessionModel != null)
+            {
+            
+                SessionManager.session_id = sessionModel.session_id;
+                SessionManager.employee_id = sessionModel.employee_id;
+                SessionManager.login_time = sessionModel.login_time;
+                SessionManager.session_token = sessionModel.session_token;
+                SessionManager.ip_address = sessionModel.ip_address;
+                SessionManager.user_agent = sessionModel.user_agent;
+                SessionManager.is_active = sessionModel.is_active;
+            }    
         }
     }
 }

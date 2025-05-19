@@ -10,9 +10,14 @@ namespace EmployeeManagementSystem.Utils
 {
     internal class HiraganaOnlyAttribute : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
-            string input = value as string;
+            if (value == null)
+            {
+                return new ValidationResult($"{ErrorMessages.ERR033_ERROR}");
+            }
+
+                string? input = value as string;
 
             // 平仮名の正規表現チェック
             if (!string.IsNullOrEmpty(input) && !Regex.IsMatch(input, @"^[\u3041-\u3096ー]+$"))

@@ -10,8 +10,13 @@ namespace EmployeeManagementSystem.Utils
 {
     internal class PhoneNumberValidationAttribute : ValidationAttribute
     {
-        protected override ValidationResult IsValid(object value, ValidationContext validationContext)
+        protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {
+            if (value == null)
+            {
+                return new ValidationResult($"{ErrorMessages.ERR033_ERROR}");
+            }
+
             var phoneNumber = value as string;
 
             // 電話番号の正規表現（ハイフン付きを許可）

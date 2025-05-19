@@ -4,13 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
+#pragma warning disable CS8602
+
 namespace EmployeeManagementSystem.Utils
 {
     public static class CloseFormHelper
     {
         public static void CloseSpecificForm(string formNameToExclude)
         {
-            Form loginForm = null; // LoginFormインスタンスを保持する変数
+            Form? loginForm = null; // LoginFormインスタンスを保持する変数
 
             // Invokeを使用してUIスレッド上で操作を実行
             if (Application.OpenForms[0].InvokeRequired)
@@ -61,6 +63,5 @@ namespace EmployeeManagementSystem.Utils
                 loginForm?.Show();
             }
         }
-
     }
 }

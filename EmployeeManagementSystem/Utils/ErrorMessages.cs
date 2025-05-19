@@ -72,6 +72,8 @@ namespace EmployeeManagementSystem.Utils
 
         public const string ERR032_COULD_NOT_UPDATE = "データの更新ができませんでした。\n入力した内容をご確認ください。";
 
+        public const string ERR033_ERROR = "エラーが発生しました。";
+
 
     }
 }

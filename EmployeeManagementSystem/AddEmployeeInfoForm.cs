@@ -242,8 +242,14 @@ namespace EmployeeManagementSystem
 
 
         //フォームを閉じた後、社員情報一覧画面のグリッドの結果を更新する
-        private void ShowEmployeeInfoDetailForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void ShowEmployeeInfoDetailForm_FormClosing(object? sender, FormClosingEventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             if (parentForm != null)
             {
                 // 社員情報一覧画面のメソッドを呼び出す
@@ -252,9 +258,15 @@ namespace EmployeeManagementSystem
         }
 
         //拠点と役職の項目をコンボボックスにセット
-        private void setConboBoxData(object sender, EventArgs e)
+        private void setConboBoxData(object? sender, EventArgs e)
         {
-            using (var dbContext = new EmployeeManagementSystemContext())
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
+                using (var dbContext = new EmployeeManagementSystemContext())
             {
                 try
                 {
@@ -289,8 +301,14 @@ namespace EmployeeManagementSystem
             }
         }
 
-        private void btnAdd_Click(object sender, EventArgs e)
+        private void btnAdd_Click(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             using (var dbContext = new EmployeeManagementSystemContext())
             {
                 // 入力内容を検証
@@ -357,8 +375,14 @@ namespace EmployeeManagementSystem
             }
         }
 
-        private void btnClear_Click(object sender, EventArgs e)
+        private void btnClear_Click(object? sender, EventArgs e)
         {
+            if (sender == null)
+            {
+                MessageBox.Show($"{ErrorMessages.ERR033_ERROR}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
+
             // テキストボックスをクリア
             txtKanaFirstName.Text = string.Empty; // 姓（かな）
             txtKanaLastName.Text = string.Empty; // 名（かな）
