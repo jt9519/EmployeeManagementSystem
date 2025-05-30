@@ -16,7 +16,12 @@ namespace EmployeeManagementSystem
 {
     public partial class AddEmployeeInfoForm : Form
     {
-        private ShowEmployeeInfoForm parentForm;
+        private ShowEmployeeInfoForm parentForm; //親フォーム
+
+        /// <summary>
+        /// 社員情報追加画面のイベント。
+        /// </summary>
+        /// <param name="parentForm">ShowEmployeeInfoFormクラス型オブジェクト（親フォームデータ）</param>
         public AddEmployeeInfoForm(ShowEmployeeInfoForm parentForm)
         {
             InitializeComponent();
@@ -25,20 +30,19 @@ namespace EmployeeManagementSystem
             this.MaximizeBox = false; // 最大化ボタンを無効化
             this.StartPosition = FormStartPosition.CenterScreen; // 画面中央に表示
             
-            //拠点と役職の項目をコンボボックスにセット
-            this.Load += setConboBoxData;
 
+            //拠点と役職の項目をコンボボックスにセット
+            this.Load += SetConboBoxData;
 
             //追加ボタンクリック
-            this.btnAdd.Click += btnAdd_Click;
+            this.btnAdd.Click += BtnAdd_Click;
 
             // クリアボタンクリック
-            btnClear.Click += btnClear_Click;
-
+            btnClear.Click += BtnClear_Click;
 
 
             // FormClosing イベントで社員情報一覧画面のメソッドを呼び出し
-            this.parentForm = parentForm;  // 親フォームを保存
+            this.parentForm = parentForm;  // 引数で受け取った親フォームを保存
             this.FormClosing += ShowEmployeeInfoDetailForm_FormClosing;
 
             // キャンセルリンククリックイベント
@@ -52,18 +56,22 @@ namespace EmployeeManagementSystem
                     MessageBoxIcon.Warning  // 警告アイコンを表示
                 );
 
-                // ダイアログの結果に基づいて処理
+                // ダイアログのYesを選択したか
                 if (result == DialogResult.Yes)
                 {
                     // キャンセル処理を実行
-                    this.Close(); // フォームを閉じる例
+                    this.Close(); // フォームを閉じる
                 }
             };
         }
 
-
+        //入力エラーを通知するためのコンポーネント
         private ErrorProvider errorProvider = new ErrorProvider();
 
+        /// <summary>
+        /// 画面のプロパティの値を入力チェックするメソッド
+        /// </summary>
+        /// <returns>バリデーション成功(true)か失敗か(false)</returns>
         private bool ValidateInput()
         {
             bool isValid = true;
@@ -91,6 +99,7 @@ namespace EmployeeManagementSystem
             }
             else
             {
+                //対象プロパティのバリデーション成功している場合、エラー表示解除（エラーメッセージを空にする）
                 errorProvider.SetError(txtKanaFirstName, string.Empty);
             }
             //
@@ -241,7 +250,9 @@ namespace EmployeeManagementSystem
 
 
 
-        //フォームを閉じた後、社員情報一覧画面のグリッドの結果を更新する
+        /// <summary>
+        /// フォームを閉じた後、社員情報一覧画面のグリッドの結果を更新する
+        /// </summary>
         private void ShowEmployeeInfoDetailForm_FormClosing(object? sender, FormClosingEventArgs e)
         {
             if (sender == null)
@@ -257,8 +268,10 @@ namespace EmployeeManagementSystem
             }
         }
 
-        //拠点と役職の項目をコンボボックスにセット
-        private void setConboBoxData(object? sender, EventArgs e)
+        /// <summary>
+        /// 拠点と役職の項目をコンボボックスにセット
+        /// </summary>
+        private void SetConboBoxData(object? sender, EventArgs e)
         {
             if (sender == null)
             {
@@ -266,28 +279,30 @@ namespace EmployeeManagementSystem
                 return;
             }
 
-                using (var dbContext = new EmployeeManagementSystemContext())
+            using (var dbContext = new EmployeeManagementSystemContext())
             {
                 try
                 {
-                    //検索エリア　拠点コンボボックス内の項目設定
+                    //拠点コンボボックス内の項目設定
                     var officeNames = dbContext.Office // OfficeテーブルへのDbSet
                         .Select(o => o.office_name) // office_name列を選択
                         .ToList();
+                    
+                    //コンボボックスをクリア
+                    selectOffice.Items.Clear();
 
                     // コンボボックスに選択肢を設定
-                    selectOffice.Items.Clear();
                     foreach (var name in officeNames)
                     {
                         selectOffice.Items.Add(name);
                     }
 
-                    //検索エリア　役職コンボボックス内の項目設定
-                    var positionNames = dbContext.Position // OfficeテーブルへのDbSet
-                        .Select(o => o.position_name) // office_name列を選択
+
+                    //役職コンボボックス内の項目設定
+                    var positionNames = dbContext.Position // PositionテーブルへのDbSet
+                        .Select(o => o.position_name) // position_name列を選択
                         .ToList();
 
-                    // コンボボックスに選択肢を設定
                     selectPosition.Items.Clear();
                     foreach (var name in positionNames)
                     {
@@ -301,7 +316,12 @@ namespace EmployeeManagementSystem
             }
         }
 
-        private void btnAdd_Click(object? sender, EventArgs e)
+
+        /// <summary>
+        /// 追加ボタンクリックイベント。<br/>
+        /// 画面のプロパティの値を取得し入力チェックを行ったあとEmployeeテーブルにレコードを作成する。
+        /// </summary>
+        private void BtnAdd_Click(object? sender, EventArgs e)
         {
             if (sender == null)
             {
@@ -311,7 +331,7 @@ namespace EmployeeManagementSystem
 
             using (var dbContext = new EmployeeManagementSystemContext())
             {
-                // 入力内容を検証
+                // 入力内容を検証 (ValidateInput が false の場合メッセージを表示し処理を終了させる)
                 if (!ValidateInput())
                 {
                     MessageBox.Show(ErrorMessages.ERR026_HAVING_INPUT_ERROR, InformationMessages.TITLE004_INPUT_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -326,19 +346,19 @@ namespace EmployeeManagementSystem
                     MessageBoxIcon.Warning  // 警告アイコンを表示
                 );
 
-                // ダイアログの結果に基づいて処理
+                // Yesを選択したか
                 if (result == DialogResult.Yes)
                 {
                     try
                     {
-                        // Office ID を取得
+                        //office_name から office_id を取得
                         var selectedOfficeName = selectOffice.SelectedItem?.ToString();
                         var officeId = dbContext.Office
                             .Where(o => o.office_name == selectedOfficeName)
                             .Select(o => o.office_id)
                             .FirstOrDefault();
 
-                        // Position ID を取得
+                        // position_name から position_id を取得
                         var selectedPositionName = selectPosition.SelectedItem?.ToString();
                         var positionId = dbContext.Position
                             .Where(p => p.position_name == selectedPositionName)
@@ -360,7 +380,7 @@ namespace EmployeeManagementSystem
                             status = 1 //在職中で登録する
                         };
 
-                        // データベースに追加
+                        // データベースに追加し保存
                         dbContext.Employee.Add(newEmployee);
                         dbContext.SaveChanges();
 
@@ -375,7 +395,11 @@ namespace EmployeeManagementSystem
             }
         }
 
-        private void btnClear_Click(object? sender, EventArgs e)
+
+        /// <summary>
+        /// クリアボタンクリック時のメソッド
+        /// </summary>
+        private void BtnClear_Click(object? sender, EventArgs e)
         {
             if (sender == null)
             {
