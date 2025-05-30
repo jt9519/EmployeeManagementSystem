@@ -23,23 +23,43 @@ namespace EmployeeManagementSystem
     {
         //グリッドの結果が社員番号の昇順であるか否か
         bool isAscendingOrderByEmpId = false;
+        //検索条件に指定があり、検索されているか否か
         bool isSearching = false;
+        //LoginFormのインスタンス
         private LoginForm loginForm;
 
+
+        /// <summary>
+        /// 社員情報一覧画面のイベント。
+        /// </summary>
         public ShowEmployeeInfoForm(LoginForm loginForm)
         {
             InitializeComponent();
             this.loginForm = loginForm;
-            this.Resize += (s, e) =>
+
+            //フォームのサイズ変更時にグリッドのサイズを調整する
+            Resize += (s, e) =>
             {
                 dataGridViewEmployee.Size = new Size(this.Width - 15, this.Height - 150);
             };
-            this.Load += ShowEmployeeInfoForm_Load;
-            this.dataGridViewEmployee.CellFormatting += DataGridViewEmployee_CellFormatting;
-            this.dataGridViewEmployee.CellContentClick += DataGridViewEmployee_CellContentClick;
-            this.btnConfirm.Click += BtnConfirm_Click;
+
+            //フォームロード
+            Load += ShowEmployeeInfoForm_Load;
+
+            //グリッドのstatusの結果をフォーマッティング
+            dataGridViewEmployee.CellFormatting += DataGridViewEmployee_CellFormatting;
+
+            //グリッドの結果の社員番号リンクをクリック
+            dataGridViewEmployee.CellContentClick += DataGridViewEmployee_CellContentClick;
+
+            //確定ボタンクリック
+            btnConfirm.Click += BtnConfirm_Click;
+
+            //検索ボタンクリック
             this.btnSearch.Click += BtnSearch_Click;
-            this.dataGridViewEmployee.ColumnHeaderMouseClick += dataGridView_EmployeeIdHeaderMouseClick;
+
+            //グリッドの社員番号ヘッダーをクリック
+            dataGridViewEmployee.ColumnHeaderMouseClick += dataGridView_EmployeeIdHeaderMouseClick;
             this.FormClosing += CloseFrom;
 
             // 社員情報追加ボタンクリック
@@ -50,14 +70,19 @@ namespace EmployeeManagementSystem
             };
 
             //ログアウトボタンクリック
-            this.btnLogout.Click += BtnLogout_Click;
+            btnLogout.Click += BtnLogout_Click;
 
             // クリアボタンクリック
             btnClear.Click += BtnClear_Click;
 
         }
 
-
+        /// <summary>
+        /// ログアウトボタンクリックイベント。
+        /// 確認ダイアログYesの場合、セッションテーブルにログアウト時間を挿入しセッションクリア後社員情報一覧画面を閉じてログイン画面を表示する。
+        /// </summary>
+        /// <param name="sender">イベントを発生させたオブジェクト</param>
+        /// <param name="e">イベントのデータ</param>
         private void BtnLogout_Click(object? sender, EventArgs e)
         {
 
@@ -86,11 +111,11 @@ namespace EmployeeManagementSystem
         }
 
 
-        //<summary>
-        //社員情報一覧表示画面を表示（ロード）するとき
-        //Set_conboBoxDataメソッドで検索エリアのコンボボックスに値を挿入し、
-        //LoadEmployeeDataメソッドでグリッドの結果に社員情報を表示する
-        //</summary>
+        ///<summary>
+        /// 社員情報一覧表示画面を表示（ロード）するとき
+        /// Set_comboBoxDataメソッドで検索エリアのコンボボックスに値を挿入し、
+        /// LoadEmployeeDataメソッドでグリッドの結果に社員情報を表示する
+        ///</summary>
         private void ShowEmployeeInfoForm_Load(object? sender, EventArgs e)
         {
             if (sender == null)
@@ -99,13 +124,13 @@ namespace EmployeeManagementSystem
                 return;
             }
 
-            Set_conboBoxData(); //検索エリアのコンボボックスにデータセット
+            Set_comboBoxData(); //検索エリアのコンボボックスにデータセット
             LoadEmployeeData(); // データを読み込み表示
         }
 
-        //<summary>
-        //statusカラム表示変換のためのフォーマッター
-        //</summary>
+        ///<summary>
+        /// statusカラム表示変換のためのフォーマッター
+        ///</summary>
         private void DataGridViewEmployee_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
             if (sender == null)
@@ -145,7 +170,7 @@ namespace EmployeeManagementSystem
                 {
                     // ShowEmployeeInfoDetailFormを開く
                     ShowEmployeeInfoDetailForm detailForm = new ShowEmployeeInfoDetailForm(employeeId, this);
-                    detailForm.Show(); // 新しいフォームを開く
+                    detailForm.Show();
                 }
             }
         }
@@ -153,7 +178,7 @@ namespace EmployeeManagementSystem
         /// <summary>
         /// 検索エリアの拠点と役職のコンボボックスに値を挿入する
         /// </summary>
-        private void Set_conboBoxData()
+        private void Set_comboBoxData()
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
@@ -164,19 +189,19 @@ namespace EmployeeManagementSystem
                         .Select(o => o.office_name) // office_name列を選択
                         .ToList();
 
-                    // コンボボックスに選択肢を設定
+                    //コンボボックスをクリア
                     selectOffice.Items.Clear();
+                    // コンボボックスに選択肢を設定
                     foreach (var name in officeNames)
                     {
                         selectOffice.Items.Add(name);
                     }
 
                     //検索エリア　役職コンボボックス内の項目設定
-                    var positionNames = dbContext.Position // OfficeテーブルへのDbSet
-                        .Select(o => o.position_name) // office_name列を選択
+                    var positionNames = dbContext.Position // PositionテーブルへのDbSet
+                        .Select(o => o.position_name) // position_name列を選択
                         .ToList();
 
-                    // コンボボックスに選択肢を設定
                     selectPosition.Items.Clear();
                     foreach (var name in positionNames)
                     {
@@ -192,7 +217,6 @@ namespace EmployeeManagementSystem
 
         /// <summary>
         /// 社員情報ビューからデータを取得しグリッドの結果に表示する
-        /// ステータスが退職済のレコードは編集不可にする
         /// </summary>
         private void LoadEmployeeData()
         {
@@ -202,12 +226,12 @@ namespace EmployeeManagementSystem
                 {
                     // データベースから従業員データ、拠点、役職を結合して取得
                     var employeeData = dbContext.EmployeeView
-                        .Where(e => e.status == 1)
+                        .Where(e => e.status == 1) //在職中社員を選択
                         .OrderBy(e => e.employee_id)
                         .ToList();
 
-                    // データグリッドに表示
-                    dataGridViewEmployee.DataSource = employeeData; // dataGridViewEmployee はグリッドコントロール
+                    // グリッドに従業員データを代入し表示
+                    dataGridViewEmployee.DataSource = employeeData;
 
                     // 各行のセルのTagを初期化および設定
                     foreach (DataGridViewRow row in dataGridViewEmployee.Rows)
@@ -217,9 +241,8 @@ namespace EmployeeManagementSystem
                             cell.Tag = cell.Value; // 現在の値をTagプロパティに設定
                         }
                     }
-
-                    isAscendingOrderByEmpId = true;
-                    //MessageBox.Show(chkRetired.Checked.ToString());
+                    
+                    isAscendingOrderByEmpId = true; //社員番号の昇順
                 }
                 catch (Exception ex)
                 {
@@ -237,7 +260,7 @@ namespace EmployeeManagementSystem
             {
                 //グリッド結果に変更があり処理が成功したかどうか
                 bool successChanged = false;
-                // 変更された行をチェック
+                // 変更をチェック（全体）
                 bool hasModified = false;
 
                 //該当エラーメッセージリスト
@@ -252,34 +275,41 @@ namespace EmployeeManagementSystem
                         .Select(o => o.position_name)
                         .ToList();
 
+
+                //グリッドの結果のレコードの数を繰り返す
                 foreach (DataGridViewRow row in dataGridViewEmployee.Rows)
                 {
-                    // 変更された行をチェック
-                    bool isModified = false;
-                    //入力値チェック
-                    bool isValid = true;
+                    
+                    bool isModified = false; // 変更された行をチェック
+                    bool isValid = true; //入力値チェック
 
+                    //レコードのセルの数（カラムの数）を繰り返す
                     for (int i = 0; i < row.Cells.Count; i++)
                     {
-                        var cellValue = row.Cells[i].Value;
+                        var cellValue = row.Cells[i].Value; //レコードのi番目のセルの値を代入
 
 
-                        // 空白チェックをすべてのセルに対して実施
+                        // 空白チェックをすべてのセルに対して実施(null見つけ次第即処理を終了させる）
                         if (cellValue == null || string.IsNullOrWhiteSpace(cellValue?.ToString()))
                         {
                             MessageBox.Show(ErrorMessages.ERR001_EMPTY_FIELD, InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
                             return; // メソッドを終了
                         }
 
+                        //[姓]25文字以上か
                         if (i == 1 && cellValue.ToString()?.Length > 25)
                         {
+                            //trueの場合該当セルの背景色を赤にする
                             row.Cells[i].Style.BackColor = Color.Red;
+                            //エラーメッセージの重複チェック
                             if (!errorMessages.Contains(ErrorMessages.ERR007_FIRST_NAME_LIMIT))
                             {
+                                //エラーメッセージをerrorMessagesリストにセット
                                 errorMessages.Add(ErrorMessages.ERR007_FIRST_NAME_LIMIT);
                             }
-                            isValid = false;
+                            isValid = false;　//バリデーション失敗
                         }
+                        //[名]25文字以上か
                         if (i == 2 && cellValue.ToString()?.Length > 25)
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
@@ -289,6 +319,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
+                        //[姓（かな）]25文字以上か
                         if (i == 3 && cellValue.ToString()?.Length > 25)
                         {
                             row.Cells[i].Style.BackColor = Color.Red;　// 背景を赤く設定
@@ -298,6 +329,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
+                        //[姓（かな）]平仮名以外を入力しているか
                         if (i == 3 && !System.Text.RegularExpressions.Regex.IsMatch(cellValue?.ToString()?? "", @"^[\u3041-\u3096ー]+$"))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
@@ -307,6 +339,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
+                        //[名（かな）]25文字以上か
                         if (i == 4 && cellValue.ToString()?.Length > 25)
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
@@ -316,6 +349,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
+                        //[名（かな）]平仮名以外を入力しているか
                         if (i == 4 && !System.Text.RegularExpressions.Regex.IsMatch(cellValue?.ToString() ?? "", @"^[\u3041-\u3096ー]+$"))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
@@ -325,7 +359,8 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
-                        if (i == 5 && !System.Text.RegularExpressions.Regex.IsMatch(cellValue?.ToString()?? "", @"^[a-zA-Z][a-zA-Z0-9._-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
+                        //[メールアドレス]正しくないメールアドレスが入力されているか
+                        if (i == 5 && !System.Text.RegularExpressions.Regex.IsMatch(cellValue?.ToString() ?? "", @"^[a-zA-Z][a-zA-Z0-9._-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
                             if (!errorMessages.Contains(ErrorMessages.ERR012_REQUIRED_VALID_MAIL))
@@ -334,6 +369,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
+                        //[電話番号]正しくない電話番号が入力されているか
                         if (i == 6 && !System.Text.RegularExpressions.Regex.IsMatch(cellValue?.ToString() ?? "", @"^\d{2,4}-\d{2,4}-\d{4}$"))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
@@ -343,6 +379,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
+                        //[拠点]存在しない拠点名が入力されているか
                         if (i == 8 && !officeNames.Contains(cellValue?.ToString() ?? InformationMessages.TITLE004_INPUT_ERROR))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
@@ -352,6 +389,7 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
+                        //[役職]存在しない役職名が入力されているか
                         if (i == 9 && !positionNames.Contains(cellValue?.ToString() ?? InformationMessages.TITLE004_INPUT_ERROR))
                         {
                             row.Cells[i].Style.BackColor = Color.Red;
@@ -361,21 +399,22 @@ namespace EmployeeManagementSystem
                             }
                             isValid = false;
                         }
+
+                        //ロード時のセルの情報（row.Cells[i].Tag）と確定ボタン押下時のセルの値が異なるか
                         if (!cellValue.Equals(row.Cells[i].Tag))
                         {
-                            // MessageBox.Show("row.Cells[i].Value;"+ $"{row.Cells[i].Value}" + "row.Cells[i].Tag" + $"{row.Cells[i].Tag}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                            //MessageBox.Show("isModified" + $"{isModified}", "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error);
                             isModified = true;
                             hasModified = true;
                         }
                     }
 
+                    //変更がない場合繰り返しをスキップ
                     if (!isModified)
                     {
                         continue;
                     }
 
-                    // 変更内容を収集
+                    // レコードの変更内容を収集
                     int employee_id = Convert.ToInt32(row.Cells["employee_id"].Value);
                     string first_name = row.Cells["first_name"].Value.ToString();
                     string last_name = row.Cells["last_name"].Value.ToString();
@@ -391,13 +430,14 @@ namespace EmployeeManagementSystem
 
 
                     // データベースの更新
-
                     try
                     {
+                        //更新したい社員番号の社員をセレクト
                         var employee = dbContext.Employee.SingleOrDefault(e => e.employee_id == employee_id);
+                        //更新したい社員番号の社員は存在するか、バリデーションは真であるか
                         if (employee != null && isValid)
                         {
-
+                            //変更内容をセット
                             employee.first_name = first_name;
                             employee.last_name = last_name;
                             employee.kana_first_name = kana_first_name;
@@ -416,13 +456,14 @@ namespace EmployeeManagementSystem
 
                             // 更新を保存
                             dbContext.SaveChanges();
+                            // 画面をロード
                             LoadEmployeeData();
-                            successChanged = true;
+                            successChanged = true; //更新成功
 
                         }
                         else
                         {
-                            successChanged = false;
+                            successChanged = false; //更新失敗
                         }
                     }
                     catch(Exception ex)
@@ -506,16 +547,18 @@ namespace EmployeeManagementSystem
             }
 
             txtErrorMessages.Visible = false; //更新時のエラーがある状態で検索ボタン押下したときエラーメッセージを非表示化
-            dataGridViewEmployee.Location = new Point(0, 220);
+            dataGridViewEmployee.Location = new Point(0, 220); //更新時にエラーがあった場合、エラーメッセージを表示する場所を確保するために下にずらしたグリッドの位置を戻す
 
-            char[] delimiters = new char[] { ' ', ',' };
-            List<string> strEmployeeId = txtEmployeeId.Text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).ToList(); // 社員番号
-            bool isCheckedRetired = chkRetired.Checked;
+            char[] delimiters = new char[] { ' ', ',' }; //社員番号複数検索に使用する区切るための文字
+            List<string> strEmployeeId = txtEmployeeId.Text.Split(delimiters, StringSplitOptions.RemoveEmptyEntries).ToList(); // delimitersで区切った社員番号リスト(文字列）
+            bool isCheckedRetired = chkRetired.Checked; //退職済チェックボックスにチェックされているか
             string name = txtName.Text; // 名前
             string kanaName = txtKanaName.Text; // 名前（かな）
             string officeName = selectOffice.SelectedItem?.ToString(); // 拠点選択
             string positionName = selectPosition.SelectedItem?.ToString(); // 役職選択
 
+
+            //strEmployeeIdリストを数値に変換
             List<int> employeeId = new List<int>();
             try
             {
@@ -526,6 +569,7 @@ namespace EmployeeManagementSystem
             }
             catch (FormatException fe)
             {
+                //数字とカンマ(,)と半角スペース以外を入力した場合の例外
                 Console.WriteLine($"{fe.Message}");
 
                 MessageBox.Show($"{ErrorMessages.ERR024_REQUIRED_VALID_EMPLOYEE_IDS}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -533,6 +577,7 @@ namespace EmployeeManagementSystem
             }
             catch (OverflowException oe)
             {
+                //データ型の範囲を超えた数字の入力があった場合の例外
                 Console.WriteLine($"{oe.Message}");
 
                 MessageBox.Show($"{ErrorMessages.ERR025_OVERFLOW_NUMBER}", InformationMessages.TITLE002_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Error);
@@ -540,12 +585,13 @@ namespace EmployeeManagementSystem
             }
             catch (Exception ex)
             {
+                //その他エラーはBtnSearch_Clickメソッド処理を終了させる
                 Console.WriteLine($"{ex.Message}");
 
-                //他エラーはBtnSearch_Clickメソッド処理を終了させる
                 return;
             }
 
+            //グリッドの結果は検索結果であるか（falseの場合結果の更新）
             if(CheckIsSearching(isCheckedRetired, employeeId, name, kanaName, officeName ?? "", positionName?? ""))
             {
                 // 検索処理を実行
@@ -553,6 +599,7 @@ namespace EmployeeManagementSystem
             }
             else
             {
+                //ロード
                 LoadEmployeeData();
             }
 
@@ -607,6 +654,7 @@ namespace EmployeeManagementSystem
 
                     // クエリを実行して結果を取得
                     var results = query.OrderBy(e => e.employee_id).ToList();
+                    
 
                     // グリッドに結果を表示
                     dataGridViewEmployee.DataSource = results;
@@ -637,8 +685,6 @@ namespace EmployeeManagementSystem
         /// <summary>
         /// クリアボタンクリックで検索条件すべてをリセットするメソッド
         /// </summary>
-        /// <param name="sender">クリアボタンがクリックされたコントロール</param>
-        /// <param name="e">クリックイベントのデータ</param>
         private void BtnClear_Click(object? sender, EventArgs e)
         {
             if (sender == null)
@@ -650,6 +696,9 @@ namespace EmployeeManagementSystem
             SearchAreaClear();
         }
 
+        /// <summary>
+        /// 検索条件すべてをリセットするメソッド
+        /// </summary>
         internal void SearchAreaClear()
         {
             // テキストボックスをクリア
@@ -687,7 +736,7 @@ namespace EmployeeManagementSystem
                 // エラーメッセージがない場合はテキストボックスをクリア
                 txtErrorMessages.Text = string.Empty;
 
-                // 非表示にする（必要に応じて設定）
+                // 非表示にする
                 txtErrorMessages.Visible = false;
             }
         }
@@ -705,20 +754,22 @@ namespace EmployeeManagementSystem
 
             using (var dbContext = new EmployeeManagementSystemContext())
             {
+                //検索中ではないか（検索中は社員番号ヘッダーを使用した昇順、降順ソート使用不可）
                 if (!isSearching)
                 {
+                    //社員番号の昇順であるか
                     if (isAscendingOrderByEmpId)
                     {
                         try
                         {
-                            // データベースから従業員データ、拠点、役職を結合して取得 (社員番号　降順）
+                            // データベースから在職中の従業員データ取得 (社員番号　降順）
                             var employeeData = dbContext.EmployeeView
                                 .Where(e => e.status != 0)
                                 .OrderByDescending(e => e.employee_id)
                                 .ToList();
 
                             // データグリッドに表示
-                            dataGridViewEmployee.DataSource = employeeData; // dataGridViewEmployee はグリッドコントロール
+                            dataGridViewEmployee.DataSource = employeeData;
 
                             // 各行のセルのTagを初期化および設定
                             foreach (DataGridViewRow row in dataGridViewEmployee.Rows)
@@ -728,8 +779,8 @@ namespace EmployeeManagementSystem
                                     cell.Tag = cell.Value; // 現在の値をTagプロパティに設定
                                 }
                             }
-
-                            isAscendingOrderByEmpId = false;
+                            
+                            isAscendingOrderByEmpId = false;　//昇順ではない（降順）
                         }
                         catch (Exception ex)
                         {
@@ -738,6 +789,7 @@ namespace EmployeeManagementSystem
                     }
                     else if (!isAscendingOrderByEmpId)
                     {
+                        //表示データが降順の場合、ロード（昇順でデータ表示される）
                         LoadEmployeeData();
                     }
                 }
@@ -746,7 +798,7 @@ namespace EmployeeManagementSystem
         }
 
         /// <summary>
-        /// ログアウトボタン以外でフォームを閉じたときのセッションの削除とログインフォームの表示メソッド
+        /// ログアウトボタン以外でフォームを閉じたとき、セッションテーブルにログアウト時間セットしセッションの削除後にログインフォームの表示するメソッド
         /// </summary>
         private void CloseFrom(object? sender, EventArgs e)
         {
@@ -761,8 +813,12 @@ namespace EmployeeManagementSystem
             loginForm.Show();// ログインフォームを再表示
         }
 
+        /// <summary>
+        /// 検索ボタン押下時に検索エリアの項目に入力や選択があるかチェックし、あればTrue、なければグリッドの結果を更新したとみなしfalseを返すメソッド
+        /// </summary>
         private bool CheckIsSearching(bool isCheckedRetired, List<int> employeeId, string name, string kanaName, string officeName, string positionName)
         {
+            //検索エリアの退職済チェックボックスにチェックされているか
             if (isCheckedRetired)
             {
                 isSearching = true;

@@ -36,6 +36,10 @@ namespace EmployeeManagementSystem.Utils
         private static Timer? sessionTimer;
         private static readonly int TimeoutDurationInMinutes = 30;
 
+
+        /// <summary>
+        /// セッションが作成されたとき、タイマーを30分にセット
+        /// </summary>
         public static void StartSession()
         {
             // タイマーを初期化
@@ -47,6 +51,10 @@ namespace EmployeeManagementSystem.Utils
         }
 
 
+        /// <summary>
+        /// セッションタイムアウト時のイベント。<br/>
+        /// セッションテーブルにログアウト時間を記録して、セッションをクリアし、タイムアウトしたことをメッセージ表示
+        /// </summary>
         private static void OnSessionTimeout(object? sender, ElapsedEventArgs e)
         {
             if (sender == null)
@@ -55,18 +63,25 @@ namespace EmployeeManagementSystem.Utils
                 return;
             }
 
-            MessageBox.Show(InformationMessages.INFO002_NOTIFY_SESSION_TIMEOUT, InformationMessages.TITLE003_SESSION_TIMEOUT, MessageBoxButtons.OK, MessageBoxIcon.Information);
+            //ログアウト時間の記録
             SetLogoutTime();
+            //セッションクリア
             Session_Clear();
+
+            MessageBox.Show(InformationMessages.INFO002_NOTIFY_SESSION_TIMEOUT, InformationMessages.TITLE003_SESSION_TIMEOUT, MessageBoxButtons.OK, MessageBoxIcon.Information);    
 
             // ログインフォーム以外をすべて閉じる
             CloseFormHelper.CloseSpecificForm("LoginForm");
 
         }
 
+
+        /// <summary>
+        /// Sessionテーブルにログアウト時間を記録する
+        /// </summary>
         public static void SetLogoutTime()
         {
-            logout_time = DateTime.Now;
+            logout_time = DateTime.Now; //ログアウト時間（メソッド呼び出し時の時間）
 
             using (var dbContext = new EmployeeManagementSystemContext())
             {
@@ -74,12 +89,13 @@ namespace EmployeeManagementSystem.Utils
                 {
 
                     var SessionRecord = dbContext.Session
-                        .Where(s => s.session_id == session_id) // 条件指定
+                        .Where(s => s.session_id == session_id) // フィールドのsession_idの値で検索
                         .FirstOrDefault(); // 最初のレコードを取得
-                                           
+
+                    //フィールドのsession_idの値で検索した結果がnullではないか
                     if (SessionRecord != null)
                     {
-                        // logout_timeを更新
+                        // logout_time、is_activeを更新
                         SessionRecord.logout_time = logout_time;
                         SessionRecord.is_active = false;
 
@@ -95,6 +111,9 @@ namespace EmployeeManagementSystem.Utils
             }
         }
 
+        /// <summary>
+        /// フィールドに格納されたデータをクリアする
+        /// </summary>
         public static void Session_Clear()
         {
             session_id = 0;

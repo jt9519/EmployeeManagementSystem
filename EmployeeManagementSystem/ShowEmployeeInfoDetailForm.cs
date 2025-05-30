@@ -14,10 +14,16 @@ namespace EmployeeManagementSystem
 {
     public partial class ShowEmployeeInfoDetailForm : Form
     {
-        private string EmployeeId;
-        private ShowEmployeeInfoForm parentForm;
+        private string EmployeeId;　//表示したい社員の社員番号
+        private ShowEmployeeInfoForm parentForm; //親フォーム
         private bool isRetired; //退職済みかどうか
 
+
+        /// <summary>
+        /// 社員情報詳細画面のイベント
+        /// </summary>
+        /// <param name="employeeId">詳細を表示したい社員番号</param>
+        /// <param name="parentForm">ShowEmployeeInfoFormクラス型オブジェクト（親フォームデータ）</param>
         public ShowEmployeeInfoDetailForm(string employeeId, ShowEmployeeInfoForm parentForm)
         {
             InitializeComponent();
@@ -26,14 +32,14 @@ namespace EmployeeManagementSystem
             //フォームロード時にデータを表示
             this.Load += ShowEmployeeInfoDetailForm_Load;
 
-            //更新ボタン押下後アクション
-            this.btnUpdate.Click += btnUpdate_Click;
+            //更新ボタンクリック
+            this.btnUpdate.Click += BtnUpdate_Click;
 
-            // クリアボタンクリック
-            this.btnClear.Click += btnClear_Click;
+            //クリアボタンクリック
+            this.btnClear.Click += BtnClear_Click;
 
             //削除ボタンクリック
-            this.btnDelete.Click += btnDelete_Click;
+            this.btnDelete.Click += BtnDelete_Click;
 
             // FormClosing イベントで社員情報一覧画面のメソッドを呼び出し
             this.parentForm = parentForm;  // 親フォームを保存
@@ -51,16 +57,21 @@ namespace EmployeeManagementSystem
                     MessageBoxIcon.Warning  // 警告アイコンを表示
                 );
 
-                // ダイアログの結果に基づいて処理
+                // ダイアログのYesを選択したか
                 if (result == DialogResult.Yes)
                 {
                     // キャンセル処理を実行
-                    this.Close(); // フォームを閉じる例
+                    this.Close(); // フォームを閉じる
                 }
             };
         }
 
-        //フォームを閉じた後、社員情報一覧画面のグリッドの結果を更新する
+
+        /// <summary>
+        /// フォームを閉じた後、社員情報一覧画面のグリッドの結果を更新する
+        /// </summary>
+        /// /// <param name="sender">イベントを発生させたオブジェクト</param>
+        /// <param name="e">イベントのデータ</param>
         private void ShowEmployeeInfoDetailForm_FormClosing(object? sender, FormClosingEventArgs e)
         {
             if (sender == null)
@@ -69,10 +80,12 @@ namespace EmployeeManagementSystem
                 return;
             }
 
+            //親フォームがnullではないか
             if (parentForm != null)
             {
+                //親フォームの検索エリアの入力や選択をクリア
                 parentForm.SearchAreaClear();
-                // 社員情報一覧画面のメソッドを呼び出す
+                //社員情報一覧画面をロード
                 parentForm.CheckIfFormClosed();
             }
         }
@@ -81,6 +94,10 @@ namespace EmployeeManagementSystem
         // 初期値を保存するディクショナリ
         private Dictionary<string, string> initialValues = new Dictionary<string, string>();
 
+        /// <summary>
+        /// もし詳細表示したい社員が在職中の場合、詳細表示したい社員の情報を画面にセット、社員情報詳細画面のコンボボックスにデータを挿入、画面にセットされた情報の初期値をinitialValuesにセット（編集されたかどうか判定のため）<br/>
+        /// 退職済みの場合、画面に情報をセットして内容を編集できないようにする
+        /// </summary>
         private void ShowEmployeeInfoDetailForm_Load(object? sender, EventArgs e)
         {
             if (sender == null)
@@ -89,8 +106,12 @@ namespace EmployeeManagementSystem
                 return;
             }
 
-            setConboBoxData();
+
+            //拠点と役職のコンボボックスにデータ挿入
+            SetConboBoxData();
+            //コンボボックスデータ以外のデータを挿入
             LoadEmployeeDetails(EmployeeId);
+
 
             //退職済の社員の情報はテキストボックスを読み取り専用に、拠点と役職のコンボボックス、クリア、削除、更新ボタンは非活性にする
             if (isRetired) 
@@ -111,6 +132,8 @@ namespace EmployeeManagementSystem
             }
             else
             {
+                
+
                 // 各項目の初期値を保存
                 initialValues["kana_first_name"] = txtKanaFirstName.Text;
                 initialValues["kana_last_name"] = txtKanaLastName.Text;
@@ -123,12 +146,17 @@ namespace EmployeeManagementSystem
             }                
         }
 
-
+        /// <summary>
+        /// 詳細表示したい社員の社員番号を引数で受け取り、表示に必要なデータをDBから取得し、画面にセット、
+        /// クラス内のisRetiredの真偽のセットを行う
+        /// </summary>
+        /// <param name="employeeId">詳細表示したい社員番号</param>
         private void LoadEmployeeDetails(string employeeId)
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
-                // 必要なデータを取得するクエリ
+                // Employee、Office、Positionテーブルを結合し必要なデータを取得するクエリ
+                // (検索条件はEmployeeテーブルの社員番号と詳細表示したい社員番号が等しいもの）
                 var employeeData = (from e in dbContext.Employee
                                     join o in dbContext.Office on e.office_id equals o.office_id
                                     join p in dbContext.Position on e.position_id equals p.position_id
@@ -147,6 +175,7 @@ namespace EmployeeManagementSystem
                                         p.position_name,
                                         e.status
                                     }).FirstOrDefault();
+                //検索結果がnullではないか
                 if (employeeData != null)
                 {
                     // 各コントロールにデータを設定 
@@ -161,6 +190,7 @@ namespace EmployeeManagementSystem
                     selectOffice.SelectedItem = employeeData.office_name;
                     selectPosition.SelectedItem = employeeData.position_name;
 
+                    //詳細表示したい社員のstatusが0（退職済)であるか
                     if(employeeData.status == 0)
                     {
                         isRetired = true;
@@ -169,8 +199,6 @@ namespace EmployeeManagementSystem
                     {
                         isRetired = false;
                     }
-                    
-
                 }
                 else
                 {
@@ -181,31 +209,36 @@ namespace EmployeeManagementSystem
 
         }
 
-        //拠点と役職の項目をコンボボックスにセット
-        private void setConboBoxData()
+
+        /// <summary>
+        /// 拠点と役職の項目をコンボボックスにセット
+        /// </summary>
+        private void SetConboBoxData()
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
                 try
                 {
-                    //検索エリア　拠点コンボボックス内の項目設定
+                    //拠点コンボボックス内の項目設定
                     var officeNames = dbContext.Office // OfficeテーブルへのDbSet
                         .Select(o => o.office_name) // office_name列を選択
                         .ToList();
 
-                    // コンボボックスに選択肢を設定
+                    //コンボボックスをクリア
                     selectOffice.Items.Clear();
+
+                    // コンボボックスに選択肢を設定
                     foreach (var name in officeNames)
                     {
                         selectOffice.Items.Add(name);
                     }
 
-                    //検索エリア　役職コンボボックス内の項目設定
-                    var positionNames = dbContext.Position // OfficeテーブルへのDbSet
-                        .Select(o => o.position_name) // office_name列を選択
+
+                    //役職コンボボックス内の項目設定
+                    var positionNames = dbContext.Position // PositionテーブルへのDbSet
+                        .Select(o => o.position_name) // position_name列を選択
                         .ToList();
 
-                    // コンボボックスに選択肢を設定
                     selectPosition.Items.Clear();
                     foreach (var name in positionNames)
                     {
@@ -220,8 +253,12 @@ namespace EmployeeManagementSystem
         }
 
 
-
-        private void btnUpdate_Click(object? sender, EventArgs e)
+        /// <summary>
+        /// 更新ボタンクリックイベント。<br/>
+        /// 変更前のデータと、更新ボタンクリック時のデータを比較し、変更があった場合入力チェックを行う。<br/>
+        /// 入力チェックが成功したら、確認ダイアログを表示し、ユーザーがYesを選択すると変更内容がDBに登録される
+        /// </summary>
+        private void BtnUpdate_Click(object? sender, EventArgs e)
         {
             if (sender == null)
             {
@@ -229,7 +266,7 @@ namespace EmployeeManagementSystem
                 return;
             }
 
-            // 現在の値を収集
+            // 更新ボタンクリック時の値を収集
             var currentValues = new Dictionary<string, string>
             {
                 ["kana_first_name"] = txtKanaFirstName.Text,
@@ -242,12 +279,13 @@ namespace EmployeeManagementSystem
                 ["position_name"] = selectPosition.Text
             };
 
-            // 変更があるかチェック
+            // 変更があるかチェック (initialValues:変更前のデータ　currentValues:更新ボタン押下時のデータ）
             bool hasChanges = initialValues.Any(iv => iv.Value != currentValues[iv.Key]);
 
+            //変更があるか
             if (hasChanges)
             {
-                // 入力内容を検証
+                // 入力内容を検証 (ValidateInput が false の場合メッセージを表示し処理を終了させる)
                 if (!ValidateInput())
                 {
                     MessageBox.Show(ErrorMessages.ERR026_HAVING_INPUT_ERROR, InformationMessages.TITLE004_INPUT_ERROR, MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -263,7 +301,7 @@ namespace EmployeeManagementSystem
                     MessageBoxIcon.Warning  // 警告アイコンを表示
                 );
 
-                // ダイアログの結果に基づいて処理
+                // Yesを選択したか
                 if (result == DialogResult.Yes)
                 {
                     // 更新処理を実行
@@ -277,22 +315,27 @@ namespace EmployeeManagementSystem
             }
             else
             {
-                // 変更がない場合
+                // 更新ボタンを押したが変更がない場合メッセージ表示
                 MessageBox.Show(InformationMessages.INFO008_NOTIFY_NO_CHANGE, InformationMessages.TITLE007_ATTENTION, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
+        /// <summary>
+        /// 確定ボタン押下時の社員情報詳細画面のデータを対象社員のレコードに反映させてDBを更新する
+        /// </summary>
+        /// <param name="currentValues">確定ボタン押下時の社員情報詳細画面のデータ</param>
         private void UpdateDatabase(Dictionary<string, string> currentValues)
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
-                // EmployeeId を使って対象のデータを取得
+                // EmployeeId を使って対象社員のデータを取得
                 int employeeId = int.Parse(EmployeeId);
                 var employee = dbContext.Employee.SingleOrDefault(e => e.employee_id == employeeId);
 
+                //対象社員のデータがnullではないか
                 if (employee != null)
                 {
-                    // フィールドを更新
+                    // DBの社員情報を更新
                     employee.kana_first_name = currentValues["kana_first_name"];
                     employee.kana_last_name = currentValues["kana_last_name"];
                     employee.first_name = currentValues["first_name"];
@@ -300,14 +343,14 @@ namespace EmployeeManagementSystem
                     employee.mail = currentValues["mail"];
                     employee.phone_num = currentValues["phone_num"];
 
-                    // office_name から office_id を取得
+                    // office_name から office_id を取得しEmployeeテーブルのoffice_idを更新
                     var office = dbContext.Office.SingleOrDefault(o => o.office_name == currentValues["office_name"]);
                     if (office != null)
                     {
                         employee.office_id = office.office_id;
                     }
 
-                    // position_name から position_id を取得
+                    // position_name から position_id を取得しEmployeeテーブルのposition_idを更新
                     var position = dbContext.Position.SingleOrDefault(p => p.position_name == currentValues["position_name"]);
                     if (position != null)
                     {
@@ -320,8 +363,11 @@ namespace EmployeeManagementSystem
             }
         }
 
-        //クリアボタンクリック時のメソッド
-        private void btnClear_Click(object? sender, EventArgs e)
+
+        /// <summary>
+        /// クリアボタンクリック時のメソッド
+        /// </summary>
+        private void BtnClear_Click(object? sender, EventArgs e)
         {
             if (sender == null)
             {
@@ -343,8 +389,12 @@ namespace EmployeeManagementSystem
             errorProvider.SetError(selectPosition, string.Empty);
         }
 
-        //削除ボタンクリック時のメソッド
-        private void btnDelete_Click(object? sender, EventArgs e)
+
+        /// <summary>
+        /// 削除ボタンクリック時のメソッド。<br/>
+        /// 対象社員のEmployeeテーブルのstatusを1(在職中)から0(退職済)に変更する（対象社員レコードの論理削除）
+        /// </summary>
+        private void BtnDelete_Click(object? sender, EventArgs e)
         {
             if (sender == null)
             {
@@ -360,25 +410,30 @@ namespace EmployeeManagementSystem
                 MessageBoxIcon.Warning
             );
 
-            // ユーザーが「Yes」を選択した場合のみ処理を実行
+            // ユーザーが「Yes」を選択したか
             if (result == DialogResult.Yes)
             {
+                //対象社員のstatusを0（退職済）に変更
                 UpdateStatusToDeleted();
             }
         }
 
-        //削除ロジック
+        /// <summary>
+        /// 対象社員のEmployeeテーブルのstatusを0に変更するメソッド（社員情報の論理削除）
+        /// </summary>
         private void UpdateStatusToDeleted()
         {
             using (var dbContext = new EmployeeManagementSystemContext())
             {
                 try
                 {
-                    // 対象の社員情報を取得
-                    var employeeId = int.Parse(EmployeeId); // ラベルから社員番号を取得
+                    // 対象の社員の社員番号を数字に変換し変数employeeIdに代入
+                    var employeeId = int.Parse(EmployeeId);
 
+                    //DBから取得した対象社員の社員のデータ
                     var employee = dbContext.Employee.SingleOrDefault(e => e.employee_id == employeeId);
 
+                    //対象社員のデータがnullではないか
                     if (employee != null)
                     {
                         // ステータスを 0 に更新
@@ -405,8 +460,13 @@ namespace EmployeeManagementSystem
             }
         }
 
+        //入力エラーを通知するためのコンポーネント
         private ErrorProvider errorProvider = new ErrorProvider();
 
+        /// <summary>
+        /// 画面のプロパティの値を入力チェックするメソッド
+        /// </summary>
+        /// <returns>バリデーション成功(true)か失敗か(false)</returns>
         private bool ValidateInput()
         {
             bool isValid = true;
@@ -434,6 +494,7 @@ namespace EmployeeManagementSystem
             }
             else
             {
+                //対象プロパティのバリデーション成功している場合、エラー表示解除（エラーメッセージを空にする）
                 errorProvider.SetError(txtKanaFirstName, string.Empty);
             }
             //
